@@ -47,7 +47,7 @@ async function mouseDrag(page: Page, from: Locator, to: { x: number; y: number }
   await page.mouse.move(to.x, to.y, { steps: 12 });
   // Let the collision pass settle on where the pointer ended up.
   await page.mouse.move(to.x, to.y + 1);
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(300);
   await page.mouse.up();
 }
 

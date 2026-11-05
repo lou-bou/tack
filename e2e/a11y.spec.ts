@@ -200,9 +200,6 @@ test('reduced motion: ticking takes no time and nothing animates', async ({ page
 });
 
 test('density changes the card size', async ({ page, request }) => {
-  await page.route('**/api/sync/push', (route) =>
-    route.fulfill({ json: { seq: 1, serverTime: Date.now(), rejected: [] } }),
-  );
   const [boardId, listId] = [randomUUID(), randomUUID()];
   const name = `Dense ${boardId.slice(0, 6)}`;
   await seed(request, [
@@ -210,13 +207,18 @@ test('density changes the card size', async ({ page, request }) => {
     listRow(listId, boardId, 'L'),
     cardRow(randomUUID(), boardId, listId, 'Measure', {}),
   ]);
-  await page.goto('/settings');
-  await page.getByRole('radio', { name: 'Roomy' }).click();
-  await expect
-    .poll(() => page.evaluate(() => document.documentElement.dataset.density))
-    .toBe('roomy');
   await page.goto(`/board/${boardId}`);
   const card = page.locator('li[data-card-id] article');
+  await expect(card).toBeVisible();
+
+  // Settings are shared on this server, so this change stays on this device.
+  await page.route('**/api/sync/**', (route) => route.abort());
+  await page.evaluate(() => {
+    history.pushState({}, '', '/settings');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+  await page.getByRole('radio', { name: 'Roomy' }).click();
+  await page.goBack();
   await expect(card).toHaveCSS('padding', '12px 14px');
 });
 

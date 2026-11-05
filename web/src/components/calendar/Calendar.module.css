@@ -1,0 +1,349 @@
+.toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+.period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.periodLabel {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.filter {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+  overflow: auto hidden;
+  padding: var(--space-1) var(--space-4) var(--space-2);
+  scrollbar-width: none;
+}
+
+.filterChip {
+  flex: none;
+  max-width: 14rem;
+  min-height: var(--control-height);
+  overflow: hidden;
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--ink-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filterChip[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden auto;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.weekdays {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding-bottom: var(--space-1);
+  color: var(--ink-2);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.monthGrid,
+.weekGrid {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.week {
+  position: relative;
+  display: grid;
+  flex: 1 0 auto;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-auto-rows: var(--calendar-chip-height);
+  grid-template-rows: var(--calendar-head-height);
+  gap: var(--border-width) 0;
+  min-height: var(--calendar-week-height);
+  padding-bottom: var(--space-1);
+}
+
+.cell {
+  padding: 0;
+  border: 0;
+  border-top: var(--border-width) solid var(--border);
+  border-left: var(--border-width) solid var(--border);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Laid over the row, so each fills its height however many lanes the bars above have made. */
+.week > .cell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(100% / 7);
+}
+
+@media (hover: hover) {
+  .week > .cell:hover {
+    background: var(--accent-soft);
+  }
+}
+
+.cellOver {
+  background: var(--accent-soft) !important;
+}
+
+.outside {
+  background: var(--surface);
+}
+
+.dayNumber {
+  position: relative;
+  grid-row: 1;
+  place-self: center end;
+  margin-right: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.todayNumber {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.chipButton {
+  position: relative;
+  display: block;
+  min-width: 0;
+  height: 100%;
+  margin: 0 var(--space-1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: transparent;
+  text-align: left;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 var(--space-1);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-card);
+  color: var(--ink);
+  font-size: var(--text-xs);
+}
+
+.chip :global(.lucide) {
+  flex: none;
+  width: var(--text-md);
+  height: var(--text-md);
+}
+
+.chip :global(span[role='img']) {
+  display: inline-flex;
+}
+
+.chipTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  flex: none;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.overdue {
+  border-color: var(--danger);
+}
+
+.overdue > :global(.lucide:first-child) {
+  color: var(--danger);
+}
+
+.dueSoon {
+  border-color: var(--warning);
+}
+
+.completed .chipTitle {
+  color: var(--ink-2);
+  text-decoration: line-through;
+}
+
+.completed > :global(.lucide:first-child) {
+  color: var(--success);
+}
+
+.fromBefore {
+  border-left-style: dashed;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.intoAfter {
+  border-right-style: dashed;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.dragging {
+  opacity: 0.4;
+}
+
+.lifted {
+  height: var(--calendar-chip-height);
+  min-width: var(--tile-width);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-floating);
+  transform: rotate(2deg) scale(1.03);
+}
+
+.more {
+  position: relative;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-card);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--text-xs);
+  text-align: left;
+}
+
+@media (hover: hover) {
+  .more:hover {
+    background: var(--surface);
+    color: var(--ink);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Phone month */
+.phoneGrid {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1) 0;
+}
+
+.phoneDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--control-height);
+  padding: var(--space-1) 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.phoneDay.outside {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.phoneSelected,
+.phoneDay.phoneSelected {
+  background: var(--accent-soft);
+}
+
+.dots {
+  display: flex;
+  gap: var(--focus-offset);
+  height: var(--space-1);
+}
+
+.dot {
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--ink-2);
+}
+
+.dayList {
+  padding-top: var(--space-3);
+}
+
+.phoneWeek {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.phoneWeekDay {
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  border-radius: var(--radius-list);
+  background: var(--surface);
+}
+
+.phoneWeekHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+@media (width >= 900px) {
+  .toolbar {
+    padding: 0 var(--space-6) var(--space-2);
+  }
+
+  .filter {
+    padding: var(--space-1) var(--space-6) var(--space-2);
+  }
+
+  .body {
+    padding: 0 var(--space-6) var(--space-4);
+  }
+}

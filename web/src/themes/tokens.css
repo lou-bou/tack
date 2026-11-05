@@ -1,0 +1,132 @@
+/* The only place raw visual values are allowed (SPEC §5). Values are from DESIGN.md. */
+:root {
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 15px;
+  --text-title: 20px;
+  --text-screen: 24px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-card: 10px;
+  --radius-list: 14px;
+  --radius-control: 10px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+  --focus-width: 2px;
+  --focus-offset: 2px;
+  --control-height: 36px;
+  --icon-size: 20px;
+  --icon-size-card: 18px;
+  --icon-stroke: 1.75;
+  --sidebar-width: 15rem;
+  --rail-width: 64px;
+  --panel-width: 28rem;
+  --today-width: 46rem;
+  --duration-fast: 120ms;
+  --duration-medium: 240ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 44px controls wherever the primary pointer is a finger. */
+@media (pointer: coarse) {
+  :root {
+    --control-height: 44px;
+  }
+}
+
+:root[data-density='compact'],
+:root:not([data-density]) {
+  --card-padding: 8px 10px;
+  --card-gap: 6px;
+  --list-width: 272px;
+  --card-title-size: var(--text-md);
+  --card-meta-size: var(--text-xs);
+}
+
+:root[data-density='roomy'] {
+  --card-padding: 12px 14px;
+  --card-gap: 10px;
+  --list-width: 300px;
+  --card-title-size: var(--text-lg);
+  --card-meta-size: var(--text-sm);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f4f5f8;
+  --surface: #ebedf2;
+  --card: #fff;
+  --border: #dde0e8;
+  --ink: #1f2233;
+  --ink-2: #5e6378;
+  --ink-3: #717687;
+  --accent: #3d6bf0;
+  --on-accent: #fff;
+  --accent-soft: #e4ebff;
+  --danger: #c33439;
+  --warning: #955f00;
+  --success: #1d9b68;
+  --priority-urgent: #c33439;
+  --priority-high: #b8541a;
+  --priority-medium: #955f00;
+  --priority-low: #557290;
+  --board-neutral: #f4f5f8;
+  --board-slate: #e6eaf0;
+  --board-blue: #e3ebfc;
+  --board-teal: #ddf1ee;
+  --board-green: #e2f1e2;
+  --board-olive: #eceedc;
+  --board-amber: #f8eed8;
+  --board-coral: #fbe4dc;
+  --board-rose: #f8e1e8;
+  --board-violet: #ece4fa;
+  --floating: #fff;
+  --floating-border: transparent;
+  --shadow-floating: 0 8px 24px rgb(31 34 51 / 16%);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #13141a;
+  --surface: #1b1d26;
+  --card: #242733;
+  --border: #2f3342;
+  --ink: #ecedf2;
+  --ink-2: #9a9eb2;
+  --ink-3: #898d9f;
+  --accent: #6e98ff;
+  --on-accent: #0f1424;
+  --accent-soft: #232e52;
+  --danger: #ff6b6e;
+  --warning: #f2b13c;
+  --success: #3fcb8e;
+  --priority-urgent: #ff6b6e;
+  --priority-high: #ff9452;
+  --priority-medium: #f2b13c;
+  --priority-low: #8faac4;
+  --board-neutral: #13141a;
+  --board-slate: #171b24;
+  --board-blue: #141b2e;
+  --board-teal: #11201f;
+  --board-green: #142016;
+  --board-olive: #1c1f13;
+  --board-amber: #241d10;
+  --board-coral: #261612;
+  --board-rose: #24141a;
+  --board-violet: #1c1628;
+
+  /* Floating layers are lighter with a faint border, rather than a heavy shadow. */
+  --floating: #2b2f3d;
+  --floating-border: #3a3f50;
+  --shadow-floating: 0 4px 12px rgb(0 0 0 / 24%);
+}

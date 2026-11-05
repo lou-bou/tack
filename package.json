@@ -1,0 +1,50 @@
+{
+  "name": "tack",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm:dev -w server\" \"npm:dev -w web\"",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "node server/dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:tz": "TZ=Pacific/Auckland vitest run --project shared && TZ=America/Los_Angeles vitest run --project shared",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && stylelint \"web/src/**/*.css\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run test:tz",
+    "brand": "node scripts/gen-brand.mjs",
+    "vapid": "node scripts/gen-vapid.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "fake-indexeddb": "^6.2.7",
+    "fast-check": "^4.10.2",
+    "globals": "^17.14.0",
+    "playwright": "^1.64.1",
+    "png-to-ico": "^3.0.2",
+    "prettier": "^3.9.10",
+    "sharp": "^0.35.5",
+    "stylelint": "^17.16.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-declaration-strict-value": "^1.12.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5",
+    "web-push": "^3.6.7"
+  }
+}

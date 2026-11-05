@@ -20,45 +20,13 @@ import { restoreCard, setCardCompleted, trashCard, updateCard } from '../../data
 import { boardTitle, useNow } from '../../lib/boards';
 import { useCardPanel } from '../../lib/cardPanel';
 import { useFirstSyncDone } from '../../lib/synced';
-import { traceSwitch } from '../../lib/trace';
 import { Button, IconButton } from '../Button';
 import { useToast } from '../Toast';
 import { DatePicker } from './DatePicker';
 import { PriorityControl } from './PriorityControl';
 import styles from './CardPanel.module.css';
 
-const loadDescription = () => import('./Description');
-const Description = lazy(loadDescription);
-const PRELOAD_FALLBACK_MS = 2000;
-
-/** Loads the editor's 500KB in the background, so it's never part of the wait after a tap. */
-function usePreloadEditor(): void {
-  useEffect(() => {
-    if (traceSwitch('noEditor')) return;
-    if ('requestIdleCallback' in window) {
-      const id = requestIdleCallback(() => void loadDescription());
-      return () => cancelIdleCallback(id);
-    }
-    const timer = setTimeout(() => void loadDescription(), PRELOAD_FALLBACK_MS);
-    return () => clearTimeout(timer);
-  }, []);
-}
-
-/** True from just after the first paint, so slow work follows the panel instead of holding it up. */
-function useAfterFirstPaint(): boolean {
-  const [painted, setPainted] = useState(false);
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const frame = requestAnimationFrame(() => {
-      timer = setTimeout(() => setPainted(true));
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(timer);
-    };
-  }, []);
-  return painted;
-}
+const Description = lazy(() => import('./Description'));
 
 const SWIPE_CLOSE_PX = 100;
 
@@ -148,7 +116,6 @@ function Details({ card }: { card: Card }) {
   const toast = useToast();
   const { close } = useCardPanel();
   const [picking, setPicking] = useState<'start' | 'due' | null>(null);
-  const painted = useAfterFirstPaint();
 
   if (!data) return null;
   const { board, lists, siblings } = data;
@@ -261,11 +228,7 @@ function Details({ card }: { card: Card }) {
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Description</h3>
         <Suspense fallback={<div className={styles.editorLoading} />}>
-          {painted && !traceSwitch('noEditor') ? (
-            <Description key={card.id} cardId={card.id} value={card.description} />
-          ) : (
-            <div className={styles.editorLoading} />
-          )}
+          <Description key={card.id} cardId={card.id} value={card.description} />
         </Suspense>
       </section>
 
@@ -309,7 +272,6 @@ export function CardPanel() {
   const cardId = params.get('card');
   const { close } = useCardPanel();
   const synced = useFirstSyncDone();
-  usePreloadEditor();
   const panel = useRef<HTMLElement>(null);
   const swipe = useRef<{ startY: number; dy: number } | null>(null);
   const card = useLiveQuery(
@@ -320,9 +282,8 @@ export function CardPanel() {
   // Focus follows the panel, and returns to the card it came from.
   useEffect(() => {
     if (!cardId) return;
-    if (!traceSwitch('noFocus')) panel.current?.focus({ preventScroll: true });
+    panel.current?.focus({ preventScroll: true });
     return () => {
-      if (traceSwitch('noFocus')) return;
       document
         .querySelector<HTMLElement>(`[data-card-id="${CSS.escape(cardId)}"] button:not([role])`)
         ?.focus({ preventScroll: true });

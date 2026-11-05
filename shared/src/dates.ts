@@ -160,18 +160,6 @@ export function parseTime(text: string): string | null {
   return match ? `${pad(Number(match[1]))}:${match[2]}` : null;
 }
 
-/**
- * Formats a time as it's typed, because phone number pads have no colon: 1830 shows as 18:30. A
- * first digit that can't start an hour means a single-digit hour, so 930 shows as 09:30.
- */
-export function maskTime(text: string): string {
-  let digits = text.replace(/\D/g, '').slice(0, 4);
-  const startsLate = digits.length >= 1 && Number(digits[0]) > 2;
-  const hourTooBig = digits.length >= 2 && Number(digits.slice(0, 2)) > 23;
-  if (startsLate || hourTooBig) digits = `0${digits}`.slice(0, 4);
-  return digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
-}
-
 export type DatePreset = 'today' | 'tomorrow' | 'nextWeek';
 
 /** "Next week" is the next Sunday. On a Sunday that is 7 days on, never today. */

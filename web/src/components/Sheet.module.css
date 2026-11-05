@@ -76,12 +76,14 @@
 
 @keyframes sheet-up {
   from {
+    opacity: 0;
     transform: translateY(var(--space-8));
   }
 }
 
 @keyframes sheet-pop {
   from {
+    opacity: 0;
     transform: scale(0.97);
   }
 }

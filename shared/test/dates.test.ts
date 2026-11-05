@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays,
   formatMonth,
-  maskTime,
   formatTimestamp,
   monthStart,
   monthWeeks,
@@ -223,32 +222,5 @@ describe('parseTime', () => {
 describe('formatTimestamp', () => {
   it('reads instants in Algiers time whatever the device zone', () => {
     expect(formatTimestamp('2026-06-30T23:30:00.000Z')).toBe('01/07/2026 00:30');
-  });
-});
-
-describe('maskTime', () => {
-  it.each([
-    ['', ''],
-    ['1', '1'],
-    ['18', '18'],
-    ['183', '18:3'],
-    ['1830', '18:30'],
-    ['18300', '18:30'], // A fifth digit is ignored.
-    ['18:30', '18:30'], // A keyboard that does have a colon still works.
-    ['9', '09'], // No hour starts with 9.
-    ['930', '09:30'],
-    ['0930', '09:30'],
-    ['25', '02:5'], // 25 can't be an hour, so it's 2 and the start of the minutes.
-    ['2359', '23:59'],
-    ['abc', ''],
-  ])('turns "%s" into "%s"', (typed, shown) => expect(maskTime(typed)).toBe(shown));
-
-  it('stays stable when applied to its own output, so backspacing works', () => {
-    for (const typed of ['1', '18', '183', '1830', '9', '930', '25', '257']) {
-      const once = maskTime(typed);
-      expect(maskTime(once)).toBe(once);
-    }
-    expect(maskTime('18:3')).toBe('18:3');
-    expect(maskTime('18:')).toBe('18');
   });
 });

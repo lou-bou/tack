@@ -15,8 +15,7 @@ import { TodayPage } from './pages/Today';
 export function App() {
   useApplyAppearance();
   return (
-    // Without transitions, a tap draws right away instead of waiting behind other rendering.
-    <BrowserRouter useTransitions={false}>
+    <BrowserRouter>
       <ToastProvider>
         <CardPanelProvider>
           <UnsentProvider>

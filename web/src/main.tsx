@@ -6,10 +6,8 @@ import './themes/tokens.css';
 import './styles/global.css';
 import { App } from './App';
 import { startSync } from './data';
-import { startTrace } from './lib/trace';
 import { startUpdates } from './lib/update';
 
-startTrace();
 startUpdates();
 startSync();
 

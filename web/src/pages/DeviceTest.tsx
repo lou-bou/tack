@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SyncCheck } from './SyncCheck';
 import styles from './DeviceTest.module.css';
 
 // Temporary page for the step 1 device test: install, offline, realtime and push, on real devices
@@ -140,6 +141,7 @@ export function DeviceTest() {
         </button>
       </div>
       <p role="status">{pushResult}</p>
+      <SyncCheck />
     </main>
   );
 }

@@ -119,6 +119,8 @@ Each step ends with a working app and a commit. The order puts risk first: anyth
 
 **Manual device checks.** Automated tests can't cover real push delivery, haptics, PWA install, long-press feel or phone performance. Steps 1, 6 and 11 need you to try them on your phone.
 
+**Status.** Steps 2 and 3 are done. Step 1's code is done, and its device test on the real server and phone is what comes next, before step 4.
+
 ## 5. Places the spec needed interpreting
 
 Defaults I'll use unless you say otherwise.

@@ -19,7 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:tz": "TZ=Pacific/Auckland vitest run --project shared && TZ=America/Los_Angeles vitest run --project shared",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tests",
     "lint": "eslint . && stylelint \"web/src/**/*.css\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

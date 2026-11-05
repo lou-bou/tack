@@ -34,6 +34,9 @@ const listFields = {
 };
 
 const cardFields = {
+  // Never changes, since cards don't move between boards. A trashed card can outlive its list, and
+  // this is how restore still finds the board (SPEC §3.9).
+  boardId: z.string().min(1),
   listId: z.string().min(1),
   position,
   title: z.string().min(1),

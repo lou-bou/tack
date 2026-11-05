@@ -5,6 +5,7 @@ import type { Config } from './config.js';
 import { openDb, type Db } from './db/index.js';
 import { EventHub } from './events.js';
 import { vapidSender, type PushSender } from './push.js';
+import { syncRoutes } from './routes/sync.js';
 import { systemRoutes } from './routes/system.js';
 
 declare module 'fastify' {
@@ -33,6 +34,7 @@ export async function buildApp(
   app.addHook('onClose', async () => db.close());
 
   await app.register(systemRoutes, { prefix: '/api' });
+  await app.register(syncRoutes, { prefix: '/api' });
 
   const hasWeb = fs.existsSync(config.webDist);
   if (hasWeb) {

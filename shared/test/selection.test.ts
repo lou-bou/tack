@@ -59,6 +59,7 @@ function card(
   return {
     id,
     clocks: {},
+    boardId: 'first',
     listId: 'l1',
     position: `a${id}`,
     title: id,

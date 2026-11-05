@@ -5,7 +5,7 @@ export default defineConfig({
     projects: [
       { test: { name: 'shared', root: './shared', environment: 'node' } },
       { test: { name: 'server', root: './server', environment: 'node' } },
-      { test: { name: 'web', root: './web', environment: 'node', include: ['test/**/*.test.ts'] } },
+      { test: { name: 'integration', root: './tests', environment: 'node' } },
     ],
   },
 });

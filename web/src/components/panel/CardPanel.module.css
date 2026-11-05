@@ -1,3 +1,5 @@
+/* Entrances here only slide. One starting at opacity 0 that a phone's browser stalls leaves a layer
+   that's invisible but still takes every tap, which looks like a frozen screen. */
 .panel {
   position: fixed;
   inset: 0;
@@ -236,13 +238,11 @@
 @keyframes panel-up {
   from {
     transform: translateY(var(--space-8));
-    opacity: 0;
   }
 }
 
 @keyframes panel-in {
   from {
     transform: translateX(var(--space-8));
-    opacity: 0;
   }
 }

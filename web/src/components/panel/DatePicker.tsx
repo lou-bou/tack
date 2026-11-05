@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import {
   formatDate,
   formatMonth,
+  maskTime,
   monthStart,
   monthWeeks,
   parseTime,
@@ -49,11 +50,14 @@ export function DatePicker({
   const [month, setMonth] = useState(monthStart(value?.date ?? today));
   const [withTime, setWithTime] = useState(!!value?.time);
   const [timeText, setTimeText] = useState(value?.time ?? defaultTime);
+  const [timeLeft, setTimeLeft] = useState(false);
 
   const time = parseTime(timeText);
   const timeForSave = withTime ? time : null;
   const dayAllowed = (date: string) => isValid({ date, time: timeForSave });
   const conflict = !!value && withTime && !!time && !isValid({ date: value.date, time });
+  // Half-typed isn't wrong yet, so this waits for all four digits or for leaving the field.
+  const showTimeProblem = !time && (timeText.length === 5 || timeLeft);
 
   const pick = (date: string) => {
     if (withTime && !time) return;
@@ -70,8 +74,9 @@ export function DatePicker({
   };
 
   const editTime = (text: string) => {
-    setTimeText(text);
-    const parsed = parseTime(text);
+    const masked = maskTime(text);
+    setTimeText(masked);
+    const parsed = parseTime(masked);
     if (!value || !parsed) return;
     const candidate = { date: value.date, time: parsed };
     if (isValid(candidate)) onChange(candidate);
@@ -152,13 +157,17 @@ export function DatePicker({
               placeholder="HH:MM"
               enterKeyHint="done"
               value={timeText}
-              aria-invalid={!time || conflict}
-              onChange={(event) => editTime(event.target.value)}
+              aria-invalid={showTimeProblem || conflict}
+              onChange={(event) => {
+                setTimeLeft(false);
+                editTime(event.target.value);
+              }}
+              onBlur={() => setTimeLeft(true)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && value && time && !conflict) onClose();
               }}
             />
-            {!time && <span className={styles.problem}>Enter a time like 18:30.</span>}
+            {showTimeProblem && <span className={styles.problem}>Enter a time like 18:30.</span>}
             {conflict && <span className={styles.problem}>Start can't be after due.</span>}
           </label>
         )}

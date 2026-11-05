@@ -67,6 +67,25 @@ test('a direct link opens the card, and closing stays on the page', async ({ pag
   await expect(page).toHaveURL(new RegExp(`/board/${boardId}$`));
 });
 
+test('the panel is never invisible, even on its first frame', async ({ page, request }) => {
+  const { boardId, name } = await seedBoard(request);
+  await openBoard(page, boardId, name);
+  await faceTitle(page, 'Pick me').click();
+  await expect(panel(page)).toBeAttached();
+  const animated = await panel(page).evaluate((el) =>
+    el.getAnimations().flatMap((a) => (a.effect as KeyframeEffect).getKeyframes()),
+  );
+  expect(animated.filter((frame) => 'opacity' in frame)).toEqual([]);
+  await expect(panel(page)).toHaveCSS('opacity', '1');
+});
+
+test('the editor loads in the background, before any card is opened', async ({ page }) => {
+  const editorChunk = page.waitForResponse(/Description-.*\.js/);
+  await page.goto('/');
+  await editorChunk;
+  await expect(panel(page)).toHaveCount(0);
+});
+
 test('a link to a card that is gone says so', async ({ page }) => {
   await page.goto(`/?card=${randomUUID()}`);
   await expect(panel(page)).toContainText("doesn't exist");
@@ -127,9 +146,15 @@ test('date picker: month calendar, time and clearing', async ({ page, request })
   await expect(due).toContainText(/15\/\d\d\/\d{4} 23:59/);
   await sheet.getByLabel('Time (24-hour)').fill('7:30');
   await expect(due).toContainText(/07:30/);
-  await sheet.getByLabel('Time (24-hour)').fill('nonsense');
+  // Half-typed isn't an error, and the colon arrives by itself, since number pads don't have one.
+  await sheet.getByLabel('Time (24-hour)').fill('18');
+  await expect(sheet.getByText('Enter a time like 18:30.')).toBeHidden();
+  await sheet.getByLabel('Time (24-hour)').fill('1830');
+  await expect(sheet.getByLabel('Time (24-hour)')).toHaveValue('18:30');
+  await expect(due).toContainText(/18:30/);
+  await sheet.getByLabel('Time (24-hour)').fill('1875');
   await expect(sheet.getByText('Enter a time like 18:30.')).toBeVisible();
-  await expect(due).toContainText(/07:30/);
+  await expect(due).toContainText(/18:30/);
   await sheet.getByRole('button', { name: 'Close' }).click();
 
   await due.click();

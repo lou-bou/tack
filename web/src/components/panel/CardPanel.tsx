@@ -26,7 +26,37 @@ import { DatePicker } from './DatePicker';
 import { PriorityControl } from './PriorityControl';
 import styles from './CardPanel.module.css';
 
-const Description = lazy(() => import('./Description'));
+const loadDescription = () => import('./Description');
+const Description = lazy(loadDescription);
+const PRELOAD_FALLBACK_MS = 2000;
+
+/** Loads the editor's 500KB in the background, so it's never part of the wait after a tap. */
+function usePreloadEditor(): void {
+  useEffect(() => {
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(() => void loadDescription());
+      return () => cancelIdleCallback(id);
+    }
+    const timer = setTimeout(() => void loadDescription(), PRELOAD_FALLBACK_MS);
+    return () => clearTimeout(timer);
+  }, []);
+}
+
+/** True from just after the first paint, so slow work follows the panel instead of holding it up. */
+function useAfterFirstPaint(): boolean {
+  const [painted, setPainted] = useState(false);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const frame = requestAnimationFrame(() => {
+      timer = setTimeout(() => setPainted(true));
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
+  }, []);
+  return painted;
+}
 
 const SWIPE_CLOSE_PX = 100;
 
@@ -116,6 +146,7 @@ function Details({ card }: { card: Card }) {
   const toast = useToast();
   const { close } = useCardPanel();
   const [picking, setPicking] = useState<'start' | 'due' | null>(null);
+  const painted = useAfterFirstPaint();
 
   if (!data) return null;
   const { board, lists, siblings } = data;
@@ -228,7 +259,11 @@ function Details({ card }: { card: Card }) {
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Description</h3>
         <Suspense fallback={<div className={styles.editorLoading} />}>
-          <Description key={card.id} cardId={card.id} value={card.description} />
+          {painted ? (
+            <Description key={card.id} cardId={card.id} value={card.description} />
+          ) : (
+            <div className={styles.editorLoading} />
+          )}
         </Suspense>
       </section>
 
@@ -272,6 +307,7 @@ export function CardPanel() {
   const cardId = params.get('card');
   const { close } = useCardPanel();
   const synced = useFirstSyncDone();
+  usePreloadEditor();
   const panel = useRef<HTMLElement>(null);
   const swipe = useRef<{ startY: number; dy: number } | null>(null);
   const card = useLiveQuery(

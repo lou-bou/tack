@@ -9,6 +9,9 @@
 }
 
 .action a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
   color: var(--accent);
   font-weight: 500;
 }

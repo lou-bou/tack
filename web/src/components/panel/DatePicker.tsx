@@ -124,7 +124,7 @@ export function DatePicker({
                   key={date}
                   type="button"
                   className={classes}
-                  aria-label={formatDate(date)}
+                  aria-label={`${Number(date.slice(8))}, ${formatDate(date)}`}
                   aria-pressed={selected}
                   disabled={!dayAllowed(date)}
                   onClick={() => pick(date)}

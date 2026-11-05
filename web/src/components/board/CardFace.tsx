@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from 'react';
+import { memo, useState, type ReactNode } from 'react';
 import {
   Check,
   ChevronDown,
@@ -82,22 +82,31 @@ function CardFaceInner({
   onToggle: (card: { id: string; completed: boolean }, willHide: boolean) => void;
 }) {
   const { open } = useCardPanel();
+  // The pop and the strike-through sweep play for a tick you just made, not on every render.
+  const [justTicked, setJustTicked] = useState(false);
 
   return (
-    <article className={`${styles.card} ${card.completed ? styles.completed : ''}`}>
+    <article
+      className={`${styles.card} ${card.completed ? styles.completed : ''} ${
+        card.completed && justTicked ? styles.justTicked : ''
+      }`}
+    >
       <button
         type="button"
         role="checkbox"
         aria-checked={card.completed}
         aria-label={`Complete ${card.title}`}
         className={styles.check}
-        onClick={() => onToggle(card, !showCompleted)}
+        onClick={() => {
+          setJustTicked(!card.completed);
+          onToggle(card, !showCompleted);
+        }}
       >
         <span className={styles.box}>{card.completed && <Check />}</span>
       </button>
       <div className={styles.content}>
         <button type="button" className={styles.title} onClick={() => open(card.id)}>
-          {card.title}
+          <span className={styles.titleText}>{card.title}</span>
         </button>
         {/* Hidden by CSS when nothing in it renders. */}
         <div className={styles.meta}>

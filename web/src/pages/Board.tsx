@@ -15,6 +15,7 @@ import { boardTitle, useBoardView, useNow } from '../lib/boards';
 import { useBoardDrag } from '../lib/boardDrag';
 import { useCompletion } from '../lib/completion';
 import { boardCollision, useDragSensors } from '../lib/dnd';
+import { useFirstSyncDone } from '../lib/synced';
 import fieldStyles from '../components/Field.module.css';
 import columnStyles from '../components/board/ListColumn.module.css';
 import styles from './Board.module.css';
@@ -68,6 +69,7 @@ function AddList({ boardId }: { boardId: string }) {
 export function BoardPage() {
   const { boardId = '' } = useParams();
   const view = useBoardView(boardId);
+  const synced = useFirstSyncDone();
   const now = useNow();
   const navigate = useNavigate();
   const { lingering, toggle } = useCompletion();
@@ -113,7 +115,7 @@ export function BoardPage() {
     return () => element.removeEventListener('scroll', onScroll);
   });
 
-  if (view === undefined) return <Screen title="" />;
+  if (view === undefined || (view === null && !synced)) return <Screen title="" />;
   if (view === null) {
     return (
       <Screen title="Board not found">

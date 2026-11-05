@@ -5,7 +5,7 @@
   height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   border-top: var(--border-width) solid var(--border);
-  background: var(--surface);
+  background: var(--card);
 }
 
 .tab {

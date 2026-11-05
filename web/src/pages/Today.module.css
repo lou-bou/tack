@@ -17,3 +17,9 @@
   font-size: var(--text-md);
   font-weight: 600;
 }
+
+.heading a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+}

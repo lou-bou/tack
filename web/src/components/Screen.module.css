@@ -16,8 +16,12 @@
 }
 
 .logo {
-  display: block;
+  display: grid;
   flex: none;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin-left: calc((var(--logo-size) - var(--control-height)) / 2);
   border-radius: var(--radius-control);
 }
 

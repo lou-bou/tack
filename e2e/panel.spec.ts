@@ -116,7 +116,7 @@ test('date picker: month calendar, time and clearing', async ({ page, request })
 
   await due.click();
   await sheet.getByRole('button', { name: 'Next month' }).click();
-  await sheet.getByRole('button', { name: /^15\// }).click();
+  await sheet.getByRole('button', { name: /^15, / }).click();
   await expect(sheet).toBeHidden();
   await expect(due).toContainText(/15\/\d\d\/\d{4}$/);
 
@@ -151,10 +151,10 @@ test('start can never pass due, by date or by time', async ({ page, request }) =
   const months = (2030 - new Date().getUTCFullYear()) * 12 + (5 - new Date().getUTCMonth());
   for (let i = 0; i < months; i += 1)
     await sheet.getByRole('button', { name: 'Next month' }).click();
-  await expect(sheet.getByRole('button', { name: '16/06/2030' })).toBeDisabled();
-  await expect(sheet.getByRole('button', { name: '15/06/2030' })).toBeEnabled();
+  await expect(sheet.getByRole('button', { name: '16, 16/06/2030' })).toBeDisabled();
+  await expect(sheet.getByRole('button', { name: '15, 15/06/2030' })).toBeEnabled();
 
-  await sheet.getByRole('button', { name: '15/06/2030' }).click();
+  await sheet.getByRole('button', { name: '15, 15/06/2030' }).click();
   await expect(panel(page).getByRole('button', { name: /^Start/ })).toContainText('15/06/2030');
 
   await panel(page)

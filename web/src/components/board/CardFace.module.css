@@ -73,6 +73,9 @@
   border-color: var(--accent);
   background: var(--accent);
   color: var(--on-accent);
+}
+
+.justTicked .box {
   animation: pop 200ms var(--ease-out);
 }
 
@@ -115,6 +118,18 @@
 .completed .title {
   color: var(--ink-3);
   text-decoration: line-through;
+}
+
+/* The line sweeps left to right, and across each line of a wrapped title. A text decoration can't
+   animate, so it goes see-through and a one-colour line stands in for it. */
+.justTicked .title {
+  text-decoration-color: transparent;
+}
+
+.justTicked .titleText {
+  animation: strike 200ms var(--ease-out) forwards;
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0 var(--border-width);
+  box-decoration-break: clone;
 }
 
 .meta {
@@ -170,7 +185,7 @@
 
 .completed .chip,
 .chip.completed {
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 
 .chip.completed :global(.lucide) {
@@ -179,6 +194,12 @@
 
 .chipWord {
   font-family: var(--font-sans);
+}
+
+@keyframes strike {
+  to {
+    background-size: 100% var(--border-width);
+  }
 }
 
 @keyframes pop {

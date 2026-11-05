@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { AppShell } from './components/AppShell';
 import { CardPanel } from './components/panel/CardPanel';
+import { Splash } from './components/Splash';
 import { ToastProvider } from './components/Toast';
 import { CardPanelProvider } from './lib/cardPanel';
 import { UnsentProvider } from './lib/unsent';
@@ -30,6 +31,7 @@ export function App() {
             <CardPanel />
           </UnsentProvider>
         </CardPanelProvider>
+        <Splash />
       </ToastProvider>
     </BrowserRouter>
   );

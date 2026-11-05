@@ -21,3 +21,15 @@
   border-radius: var(--radius-list);
   background: var(--surface);
 }
+
+.about {
+  margin-top: var(--space-6);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  color: var(--ink);
+  text-decoration: underline;
+}

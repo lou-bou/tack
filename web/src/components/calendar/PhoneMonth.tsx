@@ -32,7 +32,7 @@ function PhoneDay({
       ref={setNodeRef}
       type="button"
       className={classes.join(' ')}
-      aria-label={`${formatDate(date)}, ${cards}`}
+      aria-label={`${Number(date.slice(8))}, ${formatDate(date)}, ${cards}`}
       aria-pressed={selected}
       data-date={date}
       onClick={() => onTap(date)}

@@ -1,0 +1,82 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+}
+
+.mark {
+  position: relative;
+  width: var(--splash-size);
+  height: var(--splash-size);
+}
+
+.card {
+  animation: card-drop 450ms var(--ease-out) both;
+}
+
+.tack {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: tack-press 500ms var(--ease-out) 400ms both;
+}
+
+.body {
+  fill: var(--logo-card);
+}
+
+.check {
+  fill: none;
+  stroke: var(--logo-tack);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 16;
+}
+
+.lineDone {
+  fill: var(--logo-line-done);
+}
+
+.line {
+  fill: var(--logo-line);
+}
+
+.tackHead {
+  fill: var(--logo-tack);
+}
+
+.tackShine {
+  fill: var(--logo-shine);
+}
+
+@keyframes card-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+}
+
+@keyframes tack-press {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08, 0.82);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}

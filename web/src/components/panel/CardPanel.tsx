@@ -19,6 +19,7 @@ import { db } from '../../data';
 import { restoreCard, setCardCompleted, trashCard, updateCard } from '../../data/actions';
 import { boardTitle, useNow } from '../../lib/boards';
 import { useCardPanel } from '../../lib/cardPanel';
+import { useFirstSyncDone } from '../../lib/synced';
 import { Button, IconButton } from '../Button';
 import { useToast } from '../Toast';
 import { DatePicker } from './DatePicker';
@@ -270,6 +271,7 @@ export function CardPanel() {
   const [params] = useSearchParams();
   const cardId = params.get('card');
   const { close } = useCardPanel();
+  const synced = useFirstSyncDone();
   const panel = useRef<HTMLElement>(null);
   const swipe = useRef<{ startY: number; dy: number } | null>(null);
   const card = useLiveQuery(
@@ -318,7 +320,7 @@ export function CardPanel() {
     if (done) close();
   };
 
-  const missing = card === null || (card && card.deletedAt);
+  const missing = (card === null && synced) || (card && card.deletedAt);
 
   return (
     <aside ref={panel} className={styles.panel} aria-label="Card" tabIndex={-1}>

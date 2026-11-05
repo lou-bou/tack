@@ -185,7 +185,7 @@ test("completed cards follow their board's setting", async ({ page, request }) =
       showCompleted: true,
     },
   );
-  const label = (count: string) => new RegExp(`^${shown(17)}, ${count}`);
+  const label = (count: string) => new RegExp(`${shown(17)}, ${count}`);
   await openCalendar(page, hidden.name);
   await expect(cell(page, 17)).toHaveAccessibleName(label('0 cards'));
   await openCalendar(page, visible.name);
@@ -201,7 +201,7 @@ test.describe('phone', () => {
       { title: 'dot two', due: dv(13) },
     ]);
     await openCalendar(page, name);
-    await expect(cell(page, 13)).toHaveAccessibleName(`${shown(13)}, 2 cards`);
+    await expect(cell(page, 13)).toHaveAccessibleName(`13, ${shown(13)}, 2 cards`);
     await cell(page, 13).click();
     const list = page.getByRole('region', { name: `Cards on ${shown(13)}` });
     await expect(list.locator('li[data-card-id]')).toHaveCount(2);
@@ -223,7 +223,7 @@ test.describe('phone', () => {
     await sheet.getByLabel('Title').fill('On the phone');
     await sheet.getByRole('button', { name: 'Add card' }).click();
     await expect(sheet).toBeHidden();
-    await expect(cell(page, 22)).toHaveAccessibleName(`${shown(22)}, 1 card`);
+    await expect(cell(page, 22)).toHaveAccessibleName(`22, ${shown(22)}, 1 card`);
   });
 
   test('long press on a row and drop on a day moves the due date', async ({ page, request }) => {
@@ -247,8 +247,8 @@ test.describe('phone', () => {
     }
     await page.waitForTimeout(100);
     await send('touchEnd', []);
-    await expect(cell(page, 24)).toHaveAccessibleName(`${shown(24)}, 1 card`);
-    await expect(cell(page, 11)).toHaveAccessibleName(`${shown(11)}, 0 cards`);
+    await expect(cell(page, 24)).toHaveAccessibleName(`24, ${shown(24)}, 1 card`);
+    await expect(cell(page, 11)).toHaveAccessibleName(`11, ${shown(11)}, 0 cards`);
     await cell(page, 24).click();
     await expect(page.locator('li[data-card-id]').filter({ hasText: 'phone mover' })).toContainText(
       `${shown(24)} 09:15`,

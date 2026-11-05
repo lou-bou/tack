@@ -12,6 +12,7 @@ import { updateBoard } from '../data/actions';
 import { boardGlyph, useBoards, type BoardSummary } from '../lib/boards';
 import { useDragSensors } from '../lib/dnd';
 import { useReorder } from '../lib/reorder';
+import { useFirstSyncDone } from '../lib/synced';
 import styles from './Boards.module.css';
 
 type Row = BoardSummary & { id: string; position: string };
@@ -56,6 +57,7 @@ function Tile({ summary }: { summary: Row }) {
 
 export function BoardsPage() {
   const boards = useBoards();
+  const synced = useFirstSyncDone();
   const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
   const rows = useMemo(
@@ -88,7 +90,7 @@ export function BoardsPage() {
         </Button>
       }
     >
-      {boards?.length === 0 && <EmptyState message="No boards yet." />}
+      {boards?.length === 0 && synced && <EmptyState message="No boards yet." />}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={ordered?.map((b) => b.id) ?? []} strategy={rectSortingStrategy}>
           <ul className={styles.grid}>

@@ -6,6 +6,8 @@ import { TrashSection } from '../components/TrashSection';
 import { setDensity, setTheme, useAppearance } from '../lib/appearance';
 import styles from './Settings.module.css';
 
+const REPOSITORY = 'https://github.com/lou-bou/tack';
+
 const THEME_OPTIONS: { value: Theme; label: string }[] = [
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
@@ -48,6 +50,17 @@ export function SettingsPage() {
       </section>
       <NotificationsSection />
       <TrashSection />
+      <section className={`${styles.section} ${styles.about}`} aria-labelledby="about">
+        <h2 id="about" className={styles.heading}>
+          About
+        </h2>
+        <div className={styles.row}>
+          <span>Tack {__APP_VERSION__}</span>
+          <a className={styles.link} href={REPOSITORY} target="_blank" rel="noreferrer">
+            Repository
+          </a>
+        </div>
+      </section>
     </Screen>
   );
 }

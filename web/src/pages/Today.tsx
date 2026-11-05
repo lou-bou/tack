@@ -3,15 +3,17 @@ import { EmptyState } from '../components/EmptyState';
 import { Screen } from '../components/Screen';
 import { CardFace, CardSlot } from '../components/board/CardFace';
 import { boardTitle } from '../lib/boards';
+import { useFirstSyncDone } from '../lib/synced';
 import { useToday } from '../lib/today';
 import styles from './Today.module.css';
 
 export function TodayPage() {
   const { groups, now, toggle } = useToday();
+  const synced = useFirstSyncDone();
   return (
     <Screen title="Today">
       <div className={styles.column}>
-        {groups?.length === 0 && <EmptyState message="Nothing due today." />}
+        {groups?.length === 0 && synced && <EmptyState message="Nothing due today." />}
         {groups?.map(({ board, rows }) => (
           <section key={board.id} className={styles.group} aria-label={board.name}>
             <h2 className={styles.heading}>

@@ -5,6 +5,7 @@
   --text-xs: 12px;
   --text-sm: 13px;
   --text-md: 14px;
+  --text-input: 14px;
   --text-lg: 15px;
   --text-title: 20px;
   --text-screen: 24px;
@@ -36,6 +37,11 @@
   --pill-width-narrow: 8.25rem;
   --sheet-width: 30rem;
   --menu-width: 12rem;
+  --checkbox-size: 18px;
+  --swatch-size: 36px;
+  --tile-width: 11rem;
+  --tile-height: 7rem;
+  --picker-height: 20rem;
   --panel-width: 28rem;
   --today-width: 46rem;
   --duration-fast: 120ms;
@@ -47,6 +53,9 @@
 @media (pointer: coarse) {
   :root {
     --control-height: 44px;
+
+    /* iOS zooms the page when a focused field's text is under 16px. */
+    --text-input: 16px;
   }
 }
 
@@ -57,6 +66,7 @@
   --list-width: 272px;
   --card-title-size: var(--text-md);
   --card-meta-size: var(--text-xs);
+  --card-meta-icon: var(--text-md);
 }
 
 :root[data-density='roomy'] {
@@ -65,6 +75,7 @@
   --list-width: 300px;
   --card-title-size: var(--text-lg);
   --card-meta-size: var(--text-sm);
+  --card-meta-icon: var(--text-lg);
 }
 
 :root[data-theme='light'] {

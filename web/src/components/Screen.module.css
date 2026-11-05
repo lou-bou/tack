@@ -45,6 +45,13 @@
   padding: var(--space-2) var(--space-4) var(--space-6);
 }
 
+.flush {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
 /* On narrow phones the pill wraps to two lines, so it never pushes a short title out of view. */
 @media (width < 400px) {
   .status {

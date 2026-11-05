@@ -18,6 +18,7 @@
     "start": "node server/dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
     "test:tz": "TZ=Pacific/Auckland vitest run --project shared && TZ=America/Los_Angeles vitest run --project shared",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tests",
     "lint": "eslint . && stylelint \"web/src/**/*.css\"",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
     "concurrently": "^10.0.6",
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",

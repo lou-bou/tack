@@ -43,7 +43,9 @@ export default defineConfig({
         ],
       },
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json}'],
+        // The emoji data is one large file, and the picker must work offline.
+        maximumFileSizeToCacheInBytes: 4_000_000,
       },
     }),
   ],

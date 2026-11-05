@@ -6,3 +6,5 @@ DESIGN.md
 PLAN.md
 brand
 web/public
+test-results/
+playwright-report/

@@ -70,13 +70,13 @@ export function Sidebar() {
         </NavItem>
         <hr className={styles.divider} />
         <ul className={styles.boards} aria-label="Boards">
-          {boards?.map(({ board, hasOverdue }) => (
+          {boards?.map(({ board, overdue }) => (
             <li key={board.id}>
               <NavItem to={`/board/${board.id}`} label={board.name} collapsed={collapsed}>
                 <span className={styles.glyph} aria-hidden="true">
                   {boardGlyph(board)}
                 </span>
-                {hasOverdue && (
+                {overdue > 0 && (
                   <span className={styles.dot}>
                     <span className="sr-only">Has overdue cards</span>
                   </span>

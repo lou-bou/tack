@@ -109,4 +109,17 @@ export const MIGRATIONS: Migration[] = [
       CREATE INDEX notifications_seq ON notifications (seq);
     `,
   },
+  {
+    version: 3,
+    name: 'notification log',
+    // One row per (card, due value) already dealt with, sent or skipped. It outlives the rows in
+    // notifications, which are pruned, so a date changed away and back never notifies twice.
+    sql: `
+      CREATE TABLE notification_log (
+        cardId TEXT NOT NULL,
+        dueKey TEXT NOT NULL,
+        PRIMARY KEY (cardId, dueKey)
+      );
+    `,
+  },
 ];

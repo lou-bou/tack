@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router';
+import { Bell } from './Bell';
 import { ConnectionPill } from './ConnectionPill';
 import { LogoMark } from './Logo';
 import styles from './Screen.module.css';
@@ -31,10 +32,11 @@ export function Screen({
         </Link>
         <h1 className={styles.title}>{title}</h1>
         <div className={styles.end}>
-          <span className={styles.status}>
-            <ConnectionPill />
-          </span>
+          <Bell className={styles.bell} />
           {actions}
+        </div>
+        <div className={styles.pillRow}>
+          <ConnectionPill />
         </div>
       </header>
       <div className={flush ? styles.flush : styles.body}>{children}</div>

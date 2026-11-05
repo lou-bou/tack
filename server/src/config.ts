@@ -16,6 +16,8 @@ export interface Config {
   webDist: string;
   /** Missing keys leave push disabled; the rest of the app still runs. */
   vapid: Vapid | null;
+  /** How often to look for notifications to send. */
+  schedulerTickMs?: number;
 }
 
 function intFromEnv(name: string, fallback: number): number {
@@ -34,6 +36,7 @@ export function loadConfig(): Config {
     dbPath: process.env.DB_PATH ?? path.resolve('data/tack.db'),
     // src/ in dev, dist/ in prod: both sit one level below server/.
     webDist: process.env.WEB_DIST ?? path.resolve(here, '../../web/dist'),
+    schedulerTickMs: intFromEnv('SCHEDULER_TICK_MS', 60_000),
     vapid:
       publicKey && privateKey
         ? { publicKey, privateKey, subject: process.env.VAPID_SUBJECT ?? 'mailto:admin@localhost' }

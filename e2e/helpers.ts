@@ -4,8 +4,12 @@ import { randomUUID } from 'node:crypto';
 type Fields = Record<string, unknown>;
 
 /** Writes rows straight to the server, for tests about showing data rather than creating it. */
-export async function seed(request: APIRequestContext, changes: [string, string, Fields][]) {
-  const clock = `${String(Date.now()).padStart(13, '0')}:0000:seed`;
+export async function seed(
+  request: APIRequestContext,
+  changes: [string, string, Fields][],
+  editedAt = Date.now(),
+) {
+  const clock = `${String(editedAt).padStart(13, '0')}:0000:seed`;
   const response = await request.post('/api/sync/push', {
     data: {
       protocol: 1,

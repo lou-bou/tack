@@ -20,6 +20,11 @@ export default defineConfig({
     command: `rm -rf "${dbDir}" && mkdir -p "${dbDir}" && node server/dist/index.js`,
     url: `http://127.0.0.1:${PORT}/api/health`,
     reuseExistingServer: false,
-    env: { DB_PATH: path.join(dbDir, 'tack.db'), PORT: String(PORT), HOST: '127.0.0.1' },
+    env: {
+      DB_PATH: path.join(dbDir, 'tack.db'),
+      PORT: String(PORT),
+      HOST: '127.0.0.1',
+      SCHEDULER_TICK_MS: '300',
+    },
   },
 });

@@ -77,9 +77,14 @@ export function BoardsPage() {
     <Screen
       title="Boards"
       actions={
-        <Button variant="primary" onClick={() => setCreating(true)}>
+        <Button
+          variant="primary"
+          className={styles.newBoard}
+          aria-label="New board"
+          onClick={() => setCreating(true)}
+        >
           <Plus />
-          New board
+          <span className={styles.newBoardLabel}>New board</span>
         </Button>
       }
     >

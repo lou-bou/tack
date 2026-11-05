@@ -2,10 +2,14 @@ import {
   TABLE_NAMES,
   TABLE_SCHEMAS,
   clampHlc,
+  dueKey,
   fieldNames,
+  hlcMs,
   mergeChange,
+  notifyAt,
   trashDaysLeft,
   type Change,
+  type DateValue,
   type PullResponse,
   type PushResponse,
   type RejectedChange,
@@ -65,7 +69,7 @@ function isTombstoned(db: Db, table: TableName, id: string): boolean {
   return !!db.prepare('SELECT 1 FROM tombstones WHERE tableName = ? AND id = ?').get(table, id);
 }
 
-function removeRow(db: Db, table: TableName, id: string, seq: number): void {
+export function removeRow(db: Db, table: TableName, id: string, seq: number): void {
   db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(id);
   db.prepare('INSERT OR REPLACE INTO tombstones (tableName, id, seq) VALUES (?, ?, ?)').run(
     table,
@@ -103,6 +107,21 @@ export function purgeRow(db: Db, table: TableName, id: string, seq: number): voi
     }
   }
   removeRow(db, table, id, seq);
+}
+
+/**
+ * A due date set after its notification would have gone out never notifies (SPEC §3.8). This goes
+ * by when the edit was made, not when it arrived, so one made offline in time still gets its
+ * notification once it syncs.
+ */
+function skipIfPastTrigger(db: Db, card: Row): void {
+  const due = card.due as DateValue | null;
+  const clock = card.clocks.due;
+  if (!due || !clock || hlcMs(clock) < notifyAt(due)) return;
+  db.prepare('INSERT OR IGNORE INTO notification_log (cardId, dueKey) VALUES (?, ?)').run(
+    card.id,
+    dueKey(due),
+  );
 }
 
 /** Devices can only mark notifications read. The server creates them. */
@@ -152,6 +171,7 @@ export function applyChanges(db: Db, changes: Change[], now: number): ApplyResul
         continue;
       }
       writeRow(db, table, row, nextSeq());
+      if (table === 'cards' && row.clocks.due !== existing?.clocks.due) skipIfPastTrigger(db, row);
     }
 
     return { seq: seq ?? currentSeq(db), serverTime: now, rejected, changed: seq !== null };

@@ -8,6 +8,7 @@ import { updateBoard } from '../data/actions';
 import { boardGlyph, useBoards, type BoardSummary } from '../lib/boards';
 import { useDragSensors } from '../lib/dnd';
 import { useReorder } from '../lib/reorder';
+import { Bell } from './Bell';
 import { ConnectionPill } from './ConnectionPill';
 import { LogoMark } from './Logo';
 import { TodayBadge } from './TodayBadge';
@@ -140,6 +141,10 @@ export function Sidebar() {
 
       <div className={styles.footer}>
         <ConnectionPill iconOnly={collapsed} />
+        <Bell
+          className={styles.item}
+          label={collapsed ? undefined : <span className={styles.label}>Notifications</span>}
+        />
         <NavItem to="/settings" label="Settings" collapsed={collapsed}>
           <Settings />
         </NavItem>

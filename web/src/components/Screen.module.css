@@ -9,6 +9,7 @@
   display: flex;
   flex: none;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   min-height: calc(var(--topbar-height) + env(safe-area-inset-top));
   padding: env(safe-area-inset-top) var(--space-4) 0;
@@ -38,6 +39,28 @@
   gap: var(--space-2);
 }
 
+.bell {
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-2);
+}
+
+/* Its own row on phones, since the words won't fit beside the title and bell. */
+.pillRow {
+  flex: 0 0 100%;
+  padding-bottom: var(--space-2);
+}
+
+.pillRow:empty {
+  display: none;
+}
+
 .body {
   flex: 1;
   min-height: 0;
@@ -52,20 +75,14 @@
   min-height: 0;
 }
 
-/* On narrow phones the pill wraps to two lines, so it never pushes a short title out of view. */
-@media (width < 400px) {
-  .status {
-    max-width: var(--pill-width-narrow);
-  }
-}
-
 @media (width >= 900px) {
   .header {
     padding: var(--space-3) var(--space-6) 0;
   }
 
   .logo,
-  .status {
+  .bell,
+  .pillRow {
     display: none;
   }
 

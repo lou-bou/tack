@@ -82,3 +82,15 @@
   top: var(--space-1);
   right: var(--space-1);
 }
+
+/* The top bar is full on a narrow phone, so the button keeps just its plus. */
+@media (width < 430px) {
+  .newBoard {
+    width: var(--control-height);
+    padding: 0;
+  }
+
+  .newBoardLabel {
+    display: none;
+  }
+}

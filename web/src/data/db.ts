@@ -18,7 +18,7 @@ export interface OutboxEntry extends Change {
 export type SyncStatus = 'connecting' | 'online' | 'offline' | 'expired' | 'outdated';
 
 export interface MetaEntry {
-  key: 'seq' | 'status';
+  key: 'seq' | 'status' | 'epoch';
   value: number | SyncStatus;
 }
 

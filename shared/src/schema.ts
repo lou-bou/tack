@@ -139,6 +139,11 @@ export interface Tombstone {
 }
 
 export interface PullResponse {
+  /**
+   * Changes when the server's database is restored from a backup. Its seq has gone back in time,
+   * so a device seeing a new epoch starts over instead of trusting its own seq.
+   */
+  epoch: number;
   seq: number;
   serverTime: number;
   rows: Partial<Record<TableName, Row[]>>;

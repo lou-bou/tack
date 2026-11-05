@@ -59,6 +59,12 @@ export function currentSeq(db: Db): number {
   return db.prepare("SELECT value FROM meta WHERE key = 'seq'").pluck().get() as number;
 }
 
+/** Set by backup/restore.sh. A database that's never been restored has none. */
+function currentEpoch(db: Db): number {
+  const epoch = db.prepare("SELECT value FROM meta WHERE key = 'epoch'").pluck().get();
+  return (epoch as number | undefined) ?? 0;
+}
+
 export function bumpSeq(db: Db): number {
   const seq = currentSeq(db) + 1;
   db.prepare("UPDATE meta SET value = ? WHERE key = 'seq'").run(seq);
@@ -207,6 +213,6 @@ export function pullChanges(db: Db, since: number, now: number): PullResponse {
     const tombstones = db
       .prepare('SELECT tableName AS "table", id FROM tombstones WHERE seq > ?')
       .all(since) as Tombstone[];
-    return { seq: currentSeq(db), serverTime: now, rows, tombstones };
+    return { epoch: currentEpoch(db), seq: currentSeq(db), serverTime: now, rows, tombstones };
   })();
 }

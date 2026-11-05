@@ -25,3 +25,24 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 3
+
+  backup:
+    build: ./backup
+    image: tack-backup
+    container_name: tack-backup
+    restart: unless-stopped
+    # Run as the host user so backups are owned by you and the rclone config is readable.
+    user: '${UID:-1000}:${GID:-1000}'
+    environment:
+      TZ: ${TZ:-Africa/Algiers}
+      DB_PATH: /data/tack.db
+      BACKUP_CRON: ${BACKUP_CRON:-30 3 * * *}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      RCLONE_REMOTE: ${RCLONE_REMOTE:-gdrive}
+      RCLONE_PATH: ${RCLONE_PATH:-tack-backups}
+    volumes:
+      # Read-write: SQLite's .backup needs the WAL index (-shm) of a live database.
+      - ./data:/data
+      - ./backups:/backups
+      # Read-write so rclone can refresh the Google Drive token.
+      - ${RCLONE_CONFIG_DIR:-${HOME}/.config/rclone}:/config/rclone

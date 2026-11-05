@@ -1,5 +1,6 @@
 import 'fake-indexeddb/auto';
 import fc from 'fast-check';
+import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 import { HlcClock, type Card, type Change, type Priority } from '@tack/shared';
 import { openDb, type Db } from '../server/src/db/index.js';
@@ -61,7 +62,15 @@ class Device {
   /** Runs after the server answered a pull but before the device applies the answer. */
   duringPull: (() => Promise<void>) | null = null;
 
+  /** Points this device at another database, as a restored server would look to it. */
+  useServer(next: Db) {
+    this.server = next;
+  }
+
+  private server: Db;
+
   constructor(server: Db, name: string, wall: () => number) {
+    this.server = server;
     openDbs.push(this.db);
     this.clock = new HlcClock(name, wall);
     this.store = new Store(this.db, this.clock);
@@ -69,7 +78,7 @@ class Device {
       push: async (changes: Change[]) => {
         if (this.expired) throw new SessionExpiredError();
         if (!this.online) throw new Error('offline');
-        const { changed: _changed, ...response } = applyChanges(server, changes, wall());
+        const { changed: _changed, ...response } = applyChanges(this.server, changes, wall());
         if (this.loseNextResponse) {
           this.loseNextResponse = false;
           throw new Error('response lost');
@@ -79,7 +88,7 @@ class Device {
       pull: async (since) => {
         if (this.expired) throw new SessionExpiredError();
         if (!this.online) throw new Error('offline');
-        const response = pullChanges(server, since, wall());
+        const response = pullChanges(this.server, since, wall());
         const during = this.duringPull;
         this.duringPull = null;
         await during?.();
@@ -214,6 +223,59 @@ describe('sync scenarios', () => {
     await a.engine.sync();
     expect(await a.db.outbox.count()).toBe(0);
     expect((await a.db.meta.get('status'))?.value).toBe('online');
+  });
+
+  it('starts over from a restored backup, keeping edits still queued', async () => {
+    const { devices, server, tick } = setup(2);
+    const [a, b] = devices as [Device, Device];
+    await a.store.insert('boards', 'b', BOARD);
+    await a.store.insert('lists', 'l', LIST);
+    await a.store.insert('cards', 'old', card('a0'));
+    await a.engine.sync();
+    const backup = server.serialize();
+    tick();
+    await a.store.insert('cards', 'lost', card('a1'));
+    await a.engine.sync();
+    await b.engine.sync();
+    expect(await b.db.cards.count()).toBe(2);
+
+    // What restore.sh does: back to the snapshot, with a new epoch. Then more changes land on the
+    // server, so its seq alone couldn't show that anything happened.
+    const restored = openDb(':memory:');
+    servers.push(restored);
+    restored.exec(
+      'DELETE FROM cards; DELETE FROM lists; DELETE FROM boards; DELETE FROM tombstones;',
+    );
+    const snapshot = new Database(backup);
+    for (const table of ['boards', 'lists', 'cards', 'meta'] as const) {
+      const rows = snapshot.prepare(`SELECT * FROM ${table}`).all() as Record<string, unknown>[];
+      for (const row of rows) {
+        const columns = Object.keys(row);
+        restored
+          .prepare(
+            `INSERT OR REPLACE INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+          )
+          .run(...columns.map((c) => row[c] as never));
+      }
+    }
+    snapshot.close();
+    restored.exec(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('epoch', 42); UPDATE meta SET value = value + 50 WHERE key = 'seq';",
+    );
+
+    // A device on the restored server, with an edit made offline that's still queued.
+    tick();
+    b.online = false;
+    await b.store.update('cards', 'old', { title: 'edited offline' });
+    b.online = true;
+    b.useServer(restored);
+    await b.engine.sync();
+    await b.engine.sync();
+
+    const cards = await b.db.cards.toArray();
+    expect(cards.map((c) => c.id)).toEqual(['old']);
+    expect(cards[0]?.title).toBe('edited offline');
+    expect(pullChanges(restored, -1, 0).rows.cards?.[0]?.title).toBe('edited offline');
   });
 
   it('holds the queue through an expired session', async () => {

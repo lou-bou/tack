@@ -1,4 +1,11 @@
-import type { Change, Clocks, HlcClock, Row, TableName } from '@tack/shared';
+import {
+  TABLE_NAMES,
+  type Change,
+  type Clocks,
+  type HlcClock,
+  type Row,
+  type TableName,
+} from '@tack/shared';
 import { outboxKey, type OutboxEntry, type SyncStatus, type TackDb } from './db';
 import { OutdatedClientError, SessionExpiredError, type Transport } from './transport';
 
@@ -85,8 +92,13 @@ export class SyncEngine {
   }
 
   private async pull(): Promise<void> {
-    const since = await this.db.meta.get('seq');
-    const response = await this.transport.pull((since?.value as number | undefined) ?? 0);
+    const since = (await this.db.meta.get('seq'))?.value as number | undefined;
+    const epoch = ((await this.db.meta.get('epoch'))?.value as number | undefined) ?? 0;
+    let response = await this.transport.pull(since ?? 0);
+    if (since !== undefined && response.epoch !== epoch) {
+      await this.forgetSyncedRows();
+      response = await this.transport.pull(0);
+    }
     this.clock.syncWall(response.serverTime);
     await this.db.transaction('rw', this.db.tables, async () => {
       for (const [table, rows] of Object.entries(response.rows)) {
@@ -100,7 +112,19 @@ export class SyncEngine {
         await this.db.rows(table).delete(id);
       }
       await this.db.meta.put({ key: 'seq', value: response.seq });
+      await this.db.meta.put({ key: 'epoch', value: response.epoch });
     });
+  }
+
+  /**
+   * The server went back to a backup, so its data is now the truth and everything newer here is
+   * gone with it. Edits still queued stay queued, and go out on the next run.
+   */
+  private async forgetSyncedRows(): Promise<void> {
+    await this.db.transaction('rw', this.db.tables, async () => {
+      for (const table of TABLE_NAMES) await this.db.rows(table).clear();
+    });
+    if ((await this.db.outbox.count()) > 0) this.again = true;
   }
 
   private async applyServerRow(table: TableName, id: string, row: Row | null): Promise<void> {

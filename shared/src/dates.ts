@@ -107,6 +107,59 @@ export function formatChip(start: DateValue | null, due: DateValue | null): stri
   return only ? formatDateValue(only) : '';
 }
 
+/** DD/MM/YYYY HH:MM for a stored instant, read in TIME_ZONE. */
+export function formatTimestamp(iso: string): string {
+  const t = new TZDate(new Date(iso).getTime(), TIME_ZONE);
+  return `${pad(t.getDate())}/${pad(t.getMonth() + 1)}/${pad(t.getFullYear(), 4)} ${pad(t.getHours())}:${pad(t.getMinutes())}`;
+}
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+/** "March 2026" for any date in that month. */
+export function formatMonth(date: string): string {
+  const [y, m] = parts(date);
+  return `${MONTH_NAMES[m - 1]} ${y}`;
+}
+
+/** The first day of the month `offset` months from `date`'s month. */
+export function monthStart(date: string, offset = 0): string {
+  const [y, m] = parts(date);
+  const shifted = new Date(Date.UTC(y, m - 1 + offset, 1));
+  return `${pad(shifted.getUTCFullYear(), 4)}-${pad(shifted.getUTCMonth() + 1)}-01`;
+}
+
+/** Sunday-first weeks covering a month, each seven dates, spilling into its neighbours. */
+export function monthWeeks(date: string): string[][] {
+  const first = monthStart(date);
+  const nextMonth = monthStart(date, 1);
+  const weeks: string[][] = [];
+  let day = addDays(first, -dayOfWeek(first));
+  while (day < nextMonth) {
+    weeks.push(Array.from({ length: 7 }, (_, i) => addDays(day, i)));
+    day = addDays(day, 7);
+  }
+  return weeks;
+}
+
+/** Reads what someone typed into a 24-hour time field: "9:05", "09:05" or "0905". */
+export function parseTime(text: string): string | null {
+  const match = /^([01]?\d|2[0-3]):?([0-5]\d)$/.exec(text.trim());
+  return match ? `${pad(Number(match[1]))}:${match[2]}` : null;
+}
+
 export type DatePreset = 'today' | 'tomorrow' | 'nextWeek';
 
 /** "Next week" is the next Sunday. On a Sunday that is 7 days on, never today. */

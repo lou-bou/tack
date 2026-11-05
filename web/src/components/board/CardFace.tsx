@@ -9,8 +9,8 @@ import {
   Flag,
   FileText,
 } from 'lucide-react';
-import { useSearchParams } from 'react-router';
 import { dueState, formatChip, type Card, type Priority } from '@tack/shared';
+import { useCardPanel } from '../../lib/cardPanel';
 import styles from './CardFace.module.css';
 
 const PRIORITY_ICONS = {
@@ -77,7 +77,7 @@ function CardFaceInner({
   showCompleted: boolean;
   onToggle: (card: { id: string; completed: boolean }, willHide: boolean) => void;
 }) {
-  const [, setParams] = useSearchParams();
+  const { open } = useCardPanel();
   const hasMeta = card.priority !== 'none' || card.start || card.due || card.description;
 
   return (
@@ -93,16 +93,7 @@ function CardFaceInner({
         <span className={styles.box}>{card.completed && <Check />}</span>
       </button>
       <div className={styles.content}>
-        <button
-          type="button"
-          className={styles.title}
-          onClick={() => {
-            setParams((params) => {
-              params.set('card', card.id);
-              return params;
-            });
-          }}
-        >
+        <button type="button" className={styles.title} onClick={() => open(card.id)}>
           {card.title}
         </button>
         {hasMeta && (

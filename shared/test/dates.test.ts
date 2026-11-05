@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   addDays,
+  formatMonth,
+  formatTimestamp,
+  monthStart,
+  monthWeeks,
+  parseTime,
   dayOfWeek,
   dueKey,
   dueState,
@@ -172,5 +177,50 @@ describe('notifications', () => {
   it('gives each due value its own key', () => {
     expect(dueKey({ date: '2026-11-06', time: null })).toBe('2026-11-06');
     expect(dueKey({ date: '2026-11-06', time: '14:00' })).toBe('2026-11-06T14:00');
+  });
+});
+
+describe('month helpers', () => {
+  it('builds Sunday-first weeks that cover the whole month', () => {
+    const weeks = monthWeeks('2026-11-15'); // 1 November 2026 is a Sunday.
+    expect(weeks[0]?.[0]).toBe('2026-11-01');
+    expect(weeks.at(-1)?.at(-1)).toBe('2026-12-05');
+    for (const week of weeks) {
+      expect(week).toHaveLength(7);
+      expect(dayOfWeek(week[0]!)).toBe(0);
+    }
+  });
+
+  it('spills into the previous month when the 1st is mid-week', () => {
+    expect(monthWeeks('2026-10-01')[0]?.[0]).toBe('2026-09-27');
+  });
+
+  it('crosses year ends, in both directions', () => {
+    expect(monthStart('2026-12-31', 1)).toBe('2027-01-01');
+    expect(monthStart('2026-01-15', -1)).toBe('2025-12-01');
+  });
+
+  it('names months', () => {
+    expect(formatMonth('2026-03-09')).toBe('March 2026');
+  });
+});
+
+describe('parseTime', () => {
+  it.each([
+    ['9:05', '09:05'],
+    ['09:05', '09:05'],
+    ['0905', '09:05'],
+    ['23:59', '23:59'],
+    [' 7:30 ', '07:30'],
+  ])('reads %s', (text, expected) => expect(parseTime(text)).toBe(expected));
+
+  it.each(['24:00', '12:60', '', 'noon', '9'])('rejects "%s"', (text) =>
+    expect(parseTime(text)).toBeNull(),
+  );
+});
+
+describe('formatTimestamp', () => {
+  it('reads instants in Algiers time whatever the device zone', () => {
+    expect(formatTimestamp('2026-06-30T23:30:00.000Z')).toBe('01/07/2026 00:30');
   });
 });

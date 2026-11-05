@@ -1,0 +1,248 @@
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  outline: 0;
+  background: var(--bg);
+  animation: panel-up var(--duration-medium) var(--ease-out);
+}
+
+.bar {
+  position: relative;
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-2) 0;
+  touch-action: none;
+}
+
+.grabber {
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  width: var(--space-8);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--border);
+  transform: translateX(-50%);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  overflow: hidden auto;
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.missing {
+  padding: var(--space-8) 0;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.head {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.check {
+  position: relative;
+  flex: none;
+  height: var(--checkbox-size);
+  margin-top: var(--space-1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+}
+
+.check::before {
+  content: '';
+  position: absolute;
+  inset: calc((var(--checkbox-size) - var(--control-height)) / 2);
+}
+
+.box {
+  display: grid;
+  place-items: center;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  border: var(--border-width) solid var(--ink-2);
+  border-radius: var(--radius-pill);
+}
+
+.box :global(.lucide) {
+  width: var(--text-md);
+  height: var(--text-md);
+  stroke-width: 2.5;
+}
+
+.boxDone {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  font-size: var(--text-title);
+  font-weight: 700;
+  resize: none;
+}
+
+.crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-2);
+}
+
+.boardName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.select {
+  min-height: var(--control-height);
+  max-width: 100%;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.dateChip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  text-align: left;
+}
+
+.dateLabel {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+}
+
+.dateValue {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.dateValue :global(.lucide) {
+  width: var(--text-md);
+  height: var(--text-md);
+}
+
+.overdue .dateValue {
+  color: var(--danger);
+}
+
+.dueSoon .dateValue {
+  color: var(--warning);
+}
+
+.completed .dateValue :global(.lucide) {
+  color: var(--success);
+}
+
+.editorLoading {
+  min-height: var(--tile-height);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+
+.times {
+  display: flex;
+  flex-direction: column;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (width >= 900px) {
+  .panel {
+    inset: 0 0 0 auto;
+    width: var(--panel-width);
+    border-left: var(--border-width) solid var(--floating-border);
+    background: var(--floating);
+    box-shadow: var(--shadow-floating);
+    animation-name: panel-in;
+  }
+
+  .grabber {
+    display: none;
+  }
+}
+
+@keyframes panel-up {
+  from {
+    transform: translateY(var(--space-8));
+    opacity: 0;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    transform: translateX(var(--space-8));
+    opacity: 0;
+  }
+}

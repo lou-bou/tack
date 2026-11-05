@@ -111,6 +111,7 @@ test('the badge counts overdue and due today, leaving out in progress', async ({
       });
     await route.fulfill({
       json: {
+        epoch: 0,
         seq: 1,
         serverTime: Date.now(),
         tombstones: [],

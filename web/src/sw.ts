@@ -9,7 +9,11 @@ import { NavigationRoute, registerRoute } from 'workbox-routing';
 
 declare const self: ServiceWorkerGlobalScope;
 
-self.skipWaiting();
+// A new version waits to be told. Taking over by itself would delete the files an open page still
+// needs and reload it mid-edit (lib/update.ts picks the moment).
+self.addEventListener('message', (event) => {
+  if ((event.data as { type?: string } | null)?.type === 'SKIP_WAITING') void self.skipWaiting();
+});
 clientsClaim();
 cleanupOutdatedCaches();
 

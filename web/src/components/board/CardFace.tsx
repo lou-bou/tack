@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { dueState, formatChip, type Card, type Priority } from '@tack/shared';
 import { useCardPanel } from '../../lib/cardPanel';
+import { UnsentMarker } from '../../lib/unsent';
 import styles from './CardFace.module.css';
 
 const PRIORITY_ICONS = {
@@ -81,8 +82,6 @@ function CardFaceInner({
   onToggle: (card: { id: string; completed: boolean }, willHide: boolean) => void;
 }) {
   const { open } = useCardPanel();
-  const hasMeta =
-    card.priority !== 'none' || card.start || card.due || card.description || listName;
 
   return (
     <article className={`${styles.card} ${card.completed ? styles.completed : ''}`}>
@@ -100,18 +99,18 @@ function CardFaceInner({
         <button type="button" className={styles.title} onClick={() => open(card.id)}>
           {card.title}
         </button>
-        {hasMeta && (
-          <div className={styles.meta}>
-            <PriorityIcon priority={card.priority} />
-            <DateChip card={card} now={now} />
-            {card.description && (
-              <span className={styles.described} role="img" aria-label="Has description">
-                <FileText />
-              </span>
-            )}
-            {listName && <span className={styles.listName}>{listName}</span>}
-          </div>
-        )}
+        {/* Hidden by CSS when nothing in it renders. */}
+        <div className={styles.meta}>
+          <PriorityIcon priority={card.priority} />
+          <DateChip card={card} now={now} />
+          {card.description && (
+            <span className={styles.described} role="img" aria-label="Has description">
+              <FileText />
+            </span>
+          )}
+          {listName && <span className={styles.listName}>{listName}</span>}
+          <UnsentMarker cardId={card.id} className={styles.described} />
+        </div>
       </div>
     </article>
   );

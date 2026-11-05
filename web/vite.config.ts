@@ -10,8 +10,8 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.ts',
+      // lib/update.ts registers the worker and decides when a new version takes over.
       injectRegister: false,
-      registerType: 'autoUpdate',
       // Sends the Cloudflare Access cookie with the manifest request (SPEC §1).
       useCredentials: true,
       includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png', 'brand/*.svg'],

@@ -239,6 +239,11 @@ test.describe('description', () => {
       '700',
     );
 
+    // Saved once the card shows it has a description, so the reload can't cut the write off.
+    await expect(
+      page.locator('li[data-card-id]').getByRole('img', { name: 'Has description' }),
+    ).toBeAttached();
+
     await page.reload();
     await expect(editor(page)).toContainText('Some');
     // The stored value is the Markdown, untouched by any of that.
@@ -254,9 +259,6 @@ test.describe('description', () => {
       new URL(page.url()).searchParams.get('card'),
     );
     expect(stored).toBe(text);
-    await expect(
-      page.locator('li[data-card-id]').getByRole('img', { name: 'Has description' }),
-    ).toBeAttached();
   });
 
   test('headings, lists and quotes render, and the first line break works', async ({

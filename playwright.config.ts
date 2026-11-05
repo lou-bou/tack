@@ -13,7 +13,8 @@ export default defineConfig({
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1280, height: 800 } } },
-    { name: 'phone', use: { ...devices['Pixel 7'] } },
+    // update.spec.ts starts its own server on a fixed port, and one size is enough for it.
+    { name: 'phone', use: { ...devices['Pixel 7'] }, testIgnore: /update\.spec/ },
   ],
   webServer: {
     // A fresh database every run. Tests make their own boards, so they don't affect each other.

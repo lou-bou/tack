@@ -119,7 +119,7 @@ Each step ends with a working app and a commit. The order puts risk first: anyth
 
 **Manual device checks.** Automated tests can't cover real push delivery, haptics, PWA install, long-press feel or phone performance. Steps 1, 6 and 11 need you to try them on your phone.
 
-**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Steps 4 to 6 are done. The step 6 performance gate passed under 4x and 6x CPU throttling; Lou's check on the real phone is still to come.
+**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Steps 4 to 12 are done. The step 6 performance gate passed under 4x and 6x CPU throttling; Lou's check on the real phone is still to come.
 
 ## 5. Places the spec needed interpreting
 

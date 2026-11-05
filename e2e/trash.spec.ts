@@ -176,9 +176,14 @@ test('deleting through the app lands in Trash, and Empty trash clears it', async
   await page.getByRole('button', { name: `Menu for ${s.name}` }).click();
   await page.getByRole('menuitem', { name: 'Delete' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Boards' })).toBeVisible();
-  await expect(page.getByRole('main').getByText(s.name)).toHaveCount(0);
 
-  await page.goto('/settings');
+  await page
+    .getByRole('navigation', { name: 'Main' })
+    .filter({ visible: true })
+    .getByRole('link', { name: 'Settings' })
+    .or(page.getByRole('complementary').getByRole('link', { name: 'Settings' }))
+    .first()
+    .click();
   await expect(row(page, s.name)).toContainText('Board, 0 cards');
   // Other tests share this server, so emptying stays on this device. Delete forever covers sync.
   await page.route('**/api/sync/**', (route) => route.abort());

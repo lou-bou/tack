@@ -127,6 +127,10 @@
   font-size: var(--card-meta-size);
 }
 
+.meta:empty {
+  display: none;
+}
+
 .meta :global(.lucide) {
   width: var(--card-meta-icon);
   height: var(--card-meta-icon);

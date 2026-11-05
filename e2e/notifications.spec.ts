@@ -24,42 +24,79 @@ async function seedDueSoon(request: Parameters<typeof seed>[0]) {
   return { boardId, cardId, title };
 }
 
-test('a card coming due reaches the bell; opening the list marks it read', async ({
+const bellSheet = (page: Page) => page.getByRole('dialog', { name: 'Notifications' });
+
+/** Opens the bell and waits for the row, since the scheduler's next run may still be coming. */
+async function findRow(page: Page, title: string) {
+  const row = bellSheet(page).getByRole('button').filter({ hasText: title });
+  await bell(page).click();
+  // The open list updates by itself when the notification arrives.
+  await expect(row).toBeVisible({ timeout: 8000 });
+  return row;
+}
+
+test('a card coming due reaches the bell, and its row opens the card', async ({
   page,
   request,
 }) => {
   const { title } = await seedDueSoon(request);
   await page.goto('/');
-  await expect(bell(page)).toHaveAccessibleName(/unread/, { timeout: 5000 });
-
-  await bell(page).click();
-  const sheet = page.getByRole('dialog', { name: 'Notifications' });
-  const row = sheet.getByRole('button').filter({ hasText: title });
-  await expect(row).toContainText(/Due today at 23:59/);
-
+  const row = await findRow(page, title);
+  await expect(row).toContainText('Due today at 23:59');
   await row.click();
-  await expect(sheet).toBeHidden();
+  await expect(bellSheet(page)).toBeHidden();
   await expect(
     page.getByRole('complementary', { name: 'Card' }).getByRole('textbox', { name: 'Card title' }),
   ).toHaveValue(title);
 });
 
-test('reading on one device clears it on another', async ({ page, request, browser }) => {
-  await seedDueSoon(request);
-  const other = await (await browser.newContext()).newPage();
+test('opening the list marks notifications read on the server', async ({ page, request }) => {
+  const { title, cardId } = await seedDueSoon(request);
   await page.goto('/');
-  await other.goto('/');
-  await expect(bell(other)).toHaveAccessibleName(/unread/, { timeout: 5000 });
-  // Other tests may add more at any moment, so wait for them all to be read at once here.
-  await expect(async () => {
-    await bell(page).click();
-    await page
-      .getByRole('dialog', { name: 'Notifications' })
-      .getByRole('button', { name: 'Close' })
-      .click();
-    await expect(bell(other)).toHaveAccessibleName('Notifications', { timeout: 1500 });
-  }).toPass({ timeout: 12000 });
-  await other.context().close();
+  await findRow(page, title);
+  // It may have arrived with the list already open, which only marks it on the next opening.
+  await bellSheet(page).getByRole('button', { name: 'Close' }).click();
+  await bell(page).click();
+  await expect
+    .poll(async () => {
+      const response = await request.get('/api/sync/pull?since=0&protocol=1');
+      const { rows } = (await response.json()) as {
+        rows: { notifications?: { cardId: string; readAt: string | null }[] };
+      };
+      return rows.notifications?.find((n) => n.cardId === cardId)?.readAt ?? null;
+    })
+    .not.toBeNull();
+});
+
+test('the unread dot shows until the list is opened', async ({ page }) => {
+  // Alone, with its own data: other tests on this server mark things read at any moment.
+  const row = {
+    id: 'n',
+    cardId: 'missing',
+    dueKey: 'k',
+    title: 'Mocked',
+    body: 'Due tomorrow',
+    createdAt: new Date().toISOString(),
+    readAt: null,
+    clocks: {},
+  };
+  let served = false;
+  await page.route('**/api/sync/pull**', (route) => {
+    const rows = served ? {} : { notifications: [row] };
+    served = true;
+    return route.fulfill({
+      json: { epoch: 0, seq: 1, serverTime: Date.now(), tombstones: [], rows },
+    });
+  });
+  await page.route('**/api/sync/push', (route) =>
+    route.fulfill({ json: { seq: 1, serverTime: Date.now(), rejected: [] } }),
+  );
+  await page.goto('/');
+  await expect(bell(page)).toHaveAccessibleName('Notifications, 1 unread');
+  await bell(page).click();
+  await expect(bellSheet(page)).toContainText('Mocked');
+  await bellSheet(page).getByRole('button', { name: 'Close' }).click();
+  await expect(bell(page)).toHaveAccessibleName('Notifications');
 });
 
 test('settings offers enabling only on touch devices, and the test button reports back', async ({

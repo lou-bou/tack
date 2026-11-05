@@ -1,11 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CloudOff, LogIn, RefreshCw } from 'lucide-react';
 import { syncStatus } from '../data';
+import { applyUpdate, useUpdateReady } from '../lib/update';
 import styles from './ConnectionPill.module.css';
 
 /** Says why changes aren't reaching the server, and offers the fix when there is one. */
 export function ConnectionPill({ iconOnly = false }: { iconOnly?: boolean }) {
   const status = useLiveQuery(syncStatus, []);
+  const updateReady = useUpdateReady();
   const cls = `${styles.pill} ${iconOnly ? styles.iconOnly : ''}`;
 
   if (status === 'offline') {
@@ -34,7 +36,21 @@ export function ConnectionPill({ iconOnly = false }: { iconOnly?: boolean }) {
         className={cls}
         type="button"
         title={iconOnly ? label : undefined}
-        onClick={() => location.reload()}
+        onClick={applyUpdate}
+      >
+        <RefreshCw />
+        <span className={iconOnly ? 'sr-only' : undefined}>{label}</span>
+      </button>
+    );
+  }
+  if (updateReady) {
+    const label = 'Update ready · Reload';
+    return (
+      <button
+        className={cls}
+        type="button"
+        title={iconOnly ? label : undefined}
+        onClick={applyUpdate}
       >
         <RefreshCw />
         <span className={iconOnly ? 'sr-only' : undefined}>{label}</span>

@@ -20,6 +20,7 @@ import { restoreCard, setCardCompleted, trashCard, updateCard } from '../../data
 import { boardTitle, useNow } from '../../lib/boards';
 import { useCardPanel } from '../../lib/cardPanel';
 import { useFirstSyncDone } from '../../lib/synced';
+import { traceSwitch } from '../../lib/trace';
 import { Button, IconButton } from '../Button';
 import { useToast } from '../Toast';
 import { DatePicker } from './DatePicker';
@@ -33,6 +34,7 @@ const PRELOAD_FALLBACK_MS = 2000;
 /** Loads the editor's 500KB in the background, so it's never part of the wait after a tap. */
 function usePreloadEditor(): void {
   useEffect(() => {
+    if (traceSwitch('noEditor')) return;
     if ('requestIdleCallback' in window) {
       const id = requestIdleCallback(() => void loadDescription());
       return () => cancelIdleCallback(id);
@@ -259,7 +261,7 @@ function Details({ card }: { card: Card }) {
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Description</h3>
         <Suspense fallback={<div className={styles.editorLoading} />}>
-          {painted ? (
+          {painted && !traceSwitch('noEditor') ? (
             <Description key={card.id} cardId={card.id} value={card.description} />
           ) : (
             <div className={styles.editorLoading} />
@@ -318,8 +320,9 @@ export function CardPanel() {
   // Focus follows the panel, and returns to the card it came from.
   useEffect(() => {
     if (!cardId) return;
-    panel.current?.focus({ preventScroll: true });
+    if (!traceSwitch('noFocus')) panel.current?.focus({ preventScroll: true });
     return () => {
+      if (traceSwitch('noFocus')) return;
       document
         .querySelector<HTMLElement>(`[data-card-id="${CSS.escape(cardId)}"] button:not([role])`)
         ?.focus({ preventScroll: true });

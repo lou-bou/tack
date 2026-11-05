@@ -33,3 +33,10 @@
   color: var(--ink);
   text-decoration: underline;
 }
+
+.version {
+  min-height: var(--control-height);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}

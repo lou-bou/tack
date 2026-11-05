@@ -119,7 +119,7 @@ Each step ends with a working app and a commit. The order puts risk first: anyth
 
 **Manual device checks.** Automated tests can't cover real push delivery, haptics, PWA install, long-press feel or phone performance. Steps 1, 6 and 11 need you to try them on your phone.
 
-**Status.** Steps 2 and 3 are done. Step 1's code is done, and its device test on the real server and phone is what comes next, before step 4.
+**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Step 4 is next.
 
 ## 5. Places the spec needed interpreting
 

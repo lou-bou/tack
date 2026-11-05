@@ -20,6 +20,13 @@ fs.writeFileSync(path.join(PUBLIC, 'icons/icon-maskable-512.png'), await png(mas
 // iOS draws transparency as black, so the touch icon uses the full-bleed version.
 fs.writeFileSync(path.join(PUBLIC, 'apple-touch-icon.png'), await png(maskable, 180));
 
+// The 512px exports in brand/ follow the SVGs, so they can't drift apart.
+fs.writeFileSync('brand/tack-icon-maskable-light-512.png', await png(maskable, 512));
+fs.writeFileSync(
+  'brand/tack-icon-maskable-dark-512.png',
+  await png(fs.readFileSync('brand/tack-icon-maskable-dark.svg'), 512),
+);
+
 const ico = await Promise.all([16, 32, 48].map((size) => png(logo, size)));
 fs.writeFileSync(path.join(PUBLIC, 'favicon.ico'), await pngToIco(ico));
 fs.copyFileSync('brand/tack-logo.svg', path.join(PUBLIC, 'favicon.svg'));

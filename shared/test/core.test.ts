@@ -4,6 +4,7 @@ import {
   HlcClock,
   byPosition,
   clampHlc,
+  dropPosition,
   hlcMs,
   mergeChange,
   positionAt,
@@ -169,5 +170,41 @@ describe('positions', () => {
     ];
     const key = positionAt(sorted, 1);
     expect(key > 'a1' && key < 'a3').toBe(true);
+  });
+});
+
+describe('dropPosition', () => {
+  const sorted = (ids: string[]) => {
+    let last: string | null = null;
+    return ids.map((id) => {
+      last = positionBetween(last, null);
+      return { id, position: last };
+    });
+  };
+
+  it('lands right before its next visible neighbour', () => {
+    const siblings = sorted(['a', 'b', 'c']);
+    const position = dropPosition(siblings, ['a', 'x', 'c'], 'x');
+    // 'b' is hidden and keeps its place, so x sits between b and c.
+    expect(position > siblings[1]!.position).toBe(true);
+    expect(position < siblings[2]!.position).toBe(true);
+  });
+
+  it('lands right after the last visible card when dropped at the bottom', () => {
+    const siblings = sorted(['a', 'hidden']);
+    const position = dropPosition(siblings, ['a', 'x'], 'x');
+    expect(position > siblings[0]!.position).toBe(true);
+    expect(position < siblings[1]!.position).toBe(true);
+  });
+
+  it('goes first when dropped above everything', () => {
+    const siblings = sorted(['a', 'b']);
+    expect(dropPosition(siblings, ['x', 'a', 'b'], 'x') < siblings[0]!.position).toBe(true);
+  });
+
+  it('works in a list with no visible cards', () => {
+    const siblings = sorted(['hidden']);
+    expect(dropPosition(siblings, ['x'], 'x') > siblings[0]!.position).toBe(true);
+    expect(dropPosition([], ['x'], 'x')).toEqual(expect.any(String));
   });
 });

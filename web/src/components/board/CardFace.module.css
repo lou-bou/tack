@@ -24,6 +24,9 @@
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-card);
   background: var(--card);
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 @media (hover: hover) {

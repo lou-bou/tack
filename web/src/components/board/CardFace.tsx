@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import {
   Check,
   ChevronDown,
@@ -69,13 +69,11 @@ export function DateChip({
 function CardFaceInner({
   card,
   now,
-  leaving,
   showCompleted,
   onToggle,
 }: {
   card: Card;
   now: number;
-  leaving: boolean;
   showCompleted: boolean;
   onToggle: (card: { id: string; completed: boolean }, willHide: boolean) => void;
 }) {
@@ -83,47 +81,58 @@ function CardFaceInner({
   const hasMeta = card.priority !== 'none' || card.start || card.due || card.description;
 
   return (
-    <li className={`${styles.slot} ${leaving ? styles.leaving : ''}`} data-card-id={card.id}>
-      <div className={styles.collapse}>
-        <article className={`${styles.card} ${card.completed ? styles.completed : ''}`}>
-          <button
-            type="button"
-            role="checkbox"
-            aria-checked={card.completed}
-            aria-label={`Complete ${card.title}`}
-            className={styles.check}
-            onClick={() => onToggle(card, !showCompleted)}
-          >
-            <span className={styles.box}>{card.completed && <Check />}</span>
-          </button>
-          <div className={styles.content}>
-            <button
-              type="button"
-              className={styles.title}
-              onClick={() => {
-                setParams((params) => {
-                  params.set('card', card.id);
-                  return params;
-                });
-              }}
-            >
-              {card.title}
-            </button>
-            {hasMeta && (
-              <div className={styles.meta}>
-                <PriorityIcon priority={card.priority} />
-                <DateChip card={card} now={now} />
-                {card.description && (
-                  <span className={styles.described} role="img" aria-label="Has description">
-                    <FileText />
-                  </span>
-                )}
-              </div>
+    <article className={`${styles.card} ${card.completed ? styles.completed : ''}`}>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={card.completed}
+        aria-label={`Complete ${card.title}`}
+        className={styles.check}
+        onClick={() => onToggle(card, !showCompleted)}
+      >
+        <span className={styles.box}>{card.completed && <Check />}</span>
+      </button>
+      <div className={styles.content}>
+        <button
+          type="button"
+          className={styles.title}
+          onClick={() => {
+            setParams((params) => {
+              params.set('card', card.id);
+              return params;
+            });
+          }}
+        >
+          {card.title}
+        </button>
+        {hasMeta && (
+          <div className={styles.meta}>
+            <PriorityIcon priority={card.priority} />
+            <DateChip card={card} now={now} />
+            {card.description && (
+              <span className={styles.described} role="img" aria-label="Has description">
+                <FileText />
+              </span>
             )}
           </div>
-        </article>
+        )}
       </div>
-    </li>
+    </article>
+  );
+}
+
+/** A card's place in a list, with the collapse used when a ticked card leaves. */
+export function CardSlot({
+  leaving = false,
+  children,
+}: {
+  leaving?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`${styles.slot} ${leaving ? styles.leaving : ''}`}>
+      <div className={styles.collapse}>{children}</div>
+    </div>
   );
 }
 
@@ -134,7 +143,6 @@ export const CardFace = memo(
   CardFaceInner,
   (a, b) =>
     a.now === b.now &&
-    a.leaving === b.leaving &&
     a.showCompleted === b.showCompleted &&
     a.onToggle === b.onToggle &&
     a.card.id === b.card.id &&

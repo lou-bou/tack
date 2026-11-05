@@ -10,6 +10,11 @@
   scroll-snap-type: x mandatory;
 }
 
+/* Snap fights both paging and autoscroll mid-drag, so it waits for the drop. */
+.dragging {
+  scroll-snap-type: none;
+}
+
 .addListSlot {
   flex: 0 0 88%;
   scroll-snap-align: center;

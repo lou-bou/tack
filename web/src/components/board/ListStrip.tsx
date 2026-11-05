@@ -1,5 +1,25 @@
+import { useDroppable } from '@dnd-kit/core';
 import type { List } from '@tack/shared';
 import styles from './ListStrip.module.css';
+
+function StripTab({ list, current, onJump }: { list: List; current: boolean; onJump: () => void }) {
+  // Also a drop target: dropping a card here sends it to the end of this list.
+  const { setNodeRef, isOver } = useDroppable({
+    id: `strip:${list.id}`,
+    data: { type: 'strip', listId: list.id },
+  });
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className={`${styles.tab} ${current ? styles.current : ''} ${isOver ? styles.over : ''}`}
+      aria-current={current ? 'true' : undefined}
+      onClick={onJump}
+    >
+      {list.name}
+    </button>
+  );
+}
 
 /** Phone only: jumps between lists, and marks the one on screen. */
 export function ListStrip({
@@ -15,16 +35,12 @@ export function ListStrip({
   return (
     <nav className={styles.strip} aria-label="Lists">
       {lists.map((list, index) => (
-        <button
+        <StripTab
           key={list.id}
-          type="button"
-          data-strip-list={list.id}
-          className={`${styles.tab} ${index === current ? styles.current : ''}`}
-          aria-current={index === current ? 'true' : undefined}
-          onClick={() => onJump(index)}
-        >
-          {list.name}
-        </button>
+          list={list}
+          current={index === current}
+          onJump={() => onJump(index)}
+        />
       ))}
     </nav>
   );

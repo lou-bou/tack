@@ -28,6 +28,11 @@
   font-weight: 600;
 }
 
+.over {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
 @media (width >= 900px) {
   .strip {
     display: none;

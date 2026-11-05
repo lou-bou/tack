@@ -51,3 +51,23 @@ export function positionAt(sorted: readonly Positioned[], index: number): string
 export function positionAtEnd(sorted: readonly Positioned[]): string {
   return positionAt(sorted, sorted.length);
 }
+
+/**
+ * The position for an item dropped into a list where only some items are on screen (`visibleOrder`,
+ * after the drop, ids only). It lands next to its visible neighbour, and hidden items keep their
+ * own positions, so a completed card comes back where it was when unticked. `siblings` is every
+ * item in the list, sorted, without the moved one.
+ */
+export function dropPosition(
+  siblings: readonly Positioned[],
+  visibleOrder: readonly string[],
+  movedId: string,
+): string {
+  const at = visibleOrder.indexOf(movedId);
+  const indexOf = (id: string | undefined) => siblings.findIndex((s) => s.id === id);
+  const next = indexOf(visibleOrder[at + 1]);
+  if (next >= 0) return positionAt(siblings, next);
+  const previous = indexOf(visibleOrder[at - 1]);
+  if (previous >= 0) return positionAt(siblings, previous + 1);
+  return positionAtEnd(siblings);
+}

@@ -17,7 +17,7 @@ The toolchain and deployment copy Cairn, because it already runs on the same Thi
 | PWA | `vite-plugin-pwa` with `injectManifest` (custom worker for push), `useCredentials: true` | Same plugin as Cairn. The custom worker is needed for push and notification clicks. |
 | Drag and drop | dnd-kit | Supports the long-press delay, custom lifted card and slide-aside animation. Native HTML5 drag can't do these on phones. |
 | Description editor | CodeMirror 6 with custom live-preview decorations | The Markdown text is the document, so it can't be altered by a round trip. Rich-text editors convert back and forth. Lazy-loaded, then precached. |
-| Menus, dialogs, selects | Radix primitives, styled with tokens | Keyboard and focus behaviour comes for free. |
+| Menus, dialogs | Hand-written on `<dialog>` and the popover API, styled with tokens | The platform now gives focus trapping and the top layer, so Radix wasn't needed. |
 | Calendar, date and time pickers | Hand-written, with `date-fns` and `@date-fns/tz` | Native inputs follow the device locale, so they can show AM/PM or a Monday week start, which the spec forbids. Calendar libraries are heavy and hard to fit to these tokens. |
 | Emoji picker | `emoji-picker-element`, with its data self-hosted and precached | Its default data source is a CDN, which breaks offline use. |
 | Push | `web-push` (VAPID) | Standard library. |
@@ -119,7 +119,7 @@ Each step ends with a working app and a commit. The order puts risk first: anyth
 
 **Manual device checks.** Automated tests can't cover real push delivery, haptics, PWA install, long-press feel or phone performance. Steps 1, 6 and 11 need you to try them on your phone.
 
-**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Step 4 is done apart from a look on a real phone, with no bell yet (it arrives with step 11). Step 5 is next.
+**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Steps 4 to 6 are done. The step 6 performance gate passed under 4x and 6x CPU throttling; Lou's check on the real phone is still to come.
 
 ## 5. Places the spec needed interpreting
 

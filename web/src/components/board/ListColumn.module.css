@@ -15,6 +15,26 @@
   align-items: center;
   gap: var(--space-1);
   min-height: var(--control-height);
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.placeholder {
+  opacity: 0.4;
+}
+
+.lifted {
+  max-height: 80dvh;
+  overflow: hidden;
+  box-shadow: var(--shadow-floating);
+  transform: rotate(2deg) scale(1.03);
+}
+
+.liftedCard {
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-floating);
+  transform: rotate(2deg) scale(1.03);
 }
 
 .name {
@@ -56,7 +76,7 @@
   flex: 1;
   min-height: 0;
   overflow: hidden auto;
-  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
 }
 
 .add {
@@ -83,5 +103,12 @@
 @media (width >= 900px) {
   .column {
     flex-basis: var(--list-width);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifted,
+  .liftedCard {
+    transform: none;
   }
 }

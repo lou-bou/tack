@@ -13,6 +13,14 @@
   padding: var(--space-3);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-list);
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.lifted {
+  z-index: 1;
+  box-shadow: var(--shadow-floating);
 }
 
 @media (hover: hover) {

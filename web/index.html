@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#F4F5F8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#13141A" media="(prefers-color-scheme: dark)" />
     <script>
-      // Set the theme before first paint, so a forced Light or Dark never flashes.
+      // Set theme and density before first paint, so a saved choice never flashes.
       (function () {
         var theme = null;
         try {
@@ -21,6 +21,10 @@
           theme === 'dark' ||
           (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        try {
+          document.documentElement.dataset.density =
+            localStorage.getItem('tack.density') || 'compact';
+        } catch (e) {}
       })();
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />

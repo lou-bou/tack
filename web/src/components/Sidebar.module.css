@@ -1,0 +1,145 @@
+.sidebar {
+  display: none;
+}
+
+@media (width >= 900px) {
+  .sidebar {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: var(--sidebar-width);
+    padding: var(--space-3);
+    border-right: var(--border-width) solid var(--border);
+    background: var(--surface);
+  }
+
+  .collapsed {
+    width: var(--rail-width);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-control);
+}
+
+.collapsed .brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.wordmark {
+  font-size: var(--text-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 0;
+}
+
+.divider {
+  flex: none;
+  width: 100%;
+  margin: var(--space-1) 0;
+  border: 0;
+  border-top: var(--border-width) solid var(--border);
+}
+
+.boards {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 0;
+  overflow: hidden auto;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-2);
+  text-align: left;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.item:active {
+  transform: scale(0.97);
+}
+
+.collapsed .item {
+  justify-content: center;
+  padding: 0;
+}
+
+@media (hover: hover) {
+  .item:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+}
+
+.item.active {
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.item.active :global(.lucide) {
+  color: var(--accent);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph {
+  flex: none;
+  width: var(--icon-size);
+  text-align: center;
+}
+
+/* DOM order is glyph, dot, label. The dot sits at the far end, or on the glyph in the rail. */
+.dot {
+  flex: none;
+  order: 1;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--radius-pill);
+  background: var(--danger);
+}
+
+.collapsed .dot {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+}
+
+.footer {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+}

@@ -1,0 +1,23 @@
+.pill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+}
+
+.pill :global(.lucide) {
+  width: var(--icon-size-card);
+  height: var(--icon-size-card);
+}
+
+.iconOnly {
+  justify-content: center;
+  padding: var(--space-2);
+}

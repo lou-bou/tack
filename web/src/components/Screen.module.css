@@ -1,0 +1,68 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: calc(var(--topbar-height) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) var(--space-4) 0;
+}
+
+.logo {
+  display: block;
+  flex: none;
+  border-radius: var(--radius-control);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-screen);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.end {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-2) var(--space-4) var(--space-6);
+}
+
+/* On narrow phones the pill wraps to two lines, so it never pushes a short title out of view. */
+@media (width < 400px) {
+  .status {
+    max-width: var(--pill-width-narrow);
+  }
+}
+
+@media (width >= 900px) {
+  .header {
+    padding: var(--space-3) var(--space-6) 0;
+  }
+
+  .logo,
+  .status {
+    display: none;
+  }
+
+  .body {
+    padding: var(--space-3) var(--space-6) var(--space-6);
+  }
+}

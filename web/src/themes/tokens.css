@@ -28,6 +28,14 @@
   --icon-stroke: 1.75;
   --sidebar-width: 15rem;
   --rail-width: 64px;
+  --topbar-height: 56px;
+  --tabbar-height: 56px;
+  --logo-size: 32px;
+  --radius-sheet: 16px;
+  --dot-size: 8px;
+  --pill-width-narrow: 8.25rem;
+  --sheet-width: 30rem;
+  --menu-width: 12rem;
   --panel-width: 28rem;
   --today-width: 46rem;
   --duration-fast: 120ms;
@@ -92,6 +100,7 @@
   --floating: #fff;
   --floating-border: transparent;
   --shadow-floating: 0 8px 24px rgb(31 34 51 / 16%);
+  --overlay: rgb(31 34 51 / 40%);
 }
 
 :root[data-theme='dark'] {
@@ -129,4 +138,5 @@
   --floating: #2b2f3d;
   --floating-border: #3a3f50;
   --shadow-floating: 0 4px 12px rgb(0 0 0 / 24%);
+  --overlay: rgb(0 0 0 / 50%);
 }

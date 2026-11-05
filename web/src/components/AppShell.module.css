@@ -1,0 +1,19 @@
+/* The page itself never scrolls: each screen scrolls its own body, so the bars stay in place. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (width >= 900px) {
+  .shell {
+    flex-direction: row;
+  }
+}

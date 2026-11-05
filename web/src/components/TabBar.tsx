@@ -1,5 +1,6 @@
 import { CalendarDays, LayoutGrid, Settings, Sun } from 'lucide-react';
 import { NavLink, useMatch } from 'react-router';
+import { TodayBadge } from './TodayBadge';
 import styles from './TabBar.module.css';
 
 export function TabBar() {
@@ -13,7 +14,10 @@ export function TabBar() {
         Boards
       </NavLink>
       <NavLink to="/today" className={({ isActive }) => cls(isActive)}>
-        <Sun />
+        <span className={styles.iconWrap}>
+          <Sun />
+          <TodayBadge className={styles.badge} />
+        </span>
         Today
       </NavLink>
       <NavLink to="/calendar" className={({ isActive }) => cls(isActive)}>

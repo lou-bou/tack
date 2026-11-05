@@ -93,3 +93,10 @@ export async function openBoard(page: Page, boardId: string, name: string) {
 }
 
 export const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 900;
+
+/** A date in the app's time zone, `offset` days from today, as the app itself would compute it. */
+export function dayOffset(offset: number): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Algiers' }).format(
+    new Date(Date.now() + offset * 86_400_000),
+  );
+}

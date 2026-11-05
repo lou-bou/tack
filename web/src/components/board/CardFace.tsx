@@ -71,14 +71,18 @@ function CardFaceInner({
   now,
   showCompleted,
   onToggle,
+  listName,
 }: {
   card: Card;
   now: number;
   showCompleted: boolean;
+  /** Shown where the card is away from its board, like on Today. */
+  listName?: string;
   onToggle: (card: { id: string; completed: boolean }, willHide: boolean) => void;
 }) {
   const { open } = useCardPanel();
-  const hasMeta = card.priority !== 'none' || card.start || card.due || card.description;
+  const hasMeta =
+    card.priority !== 'none' || card.start || card.due || card.description || listName;
 
   return (
     <article className={`${styles.card} ${card.completed ? styles.completed : ''}`}>
@@ -105,6 +109,7 @@ function CardFaceInner({
                 <FileText />
               </span>
             )}
+            {listName && <span className={styles.listName}>{listName}</span>}
           </div>
         )}
       </div>
@@ -135,6 +140,7 @@ export const CardFace = memo(
   (a, b) =>
     a.now === b.now &&
     a.showCompleted === b.showCompleted &&
+    a.listName === b.listName &&
     a.onToggle === b.onToggle &&
     a.card.id === b.card.id &&
     a.card.title === b.card.title &&

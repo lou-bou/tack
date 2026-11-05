@@ -136,6 +136,17 @@
   right: var(--space-1);
 }
 
+/* DOM order is icon, badge, label. It sits at the far end, or on the icon in the rail. */
+.todayBadge {
+  order: 1;
+}
+
+.collapsed .todayBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 .footer {
   display: flex;
   flex: none;

@@ -23,6 +23,17 @@
   transform: scale(0.97);
 }
 
+.iconWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.badge {
+  position: absolute;
+  bottom: 50%;
+  left: 60%;
+}
+
 .active {
   color: var(--accent);
   font-weight: 600;

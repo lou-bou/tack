@@ -132,6 +132,10 @@
   height: var(--card-meta-icon);
 }
 
+.listName {
+  color: var(--ink-3);
+}
+
 .priority,
 .described {
   display: inline-flex;

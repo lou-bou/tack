@@ -10,6 +10,7 @@ import { useDragSensors } from '../lib/dnd';
 import { useReorder } from '../lib/reorder';
 import { ConnectionPill } from './ConnectionPill';
 import { LogoMark } from './Logo';
+import { TodayBadge } from './TodayBadge';
 import styles from './Sidebar.module.css';
 
 const COLLAPSED_KEY = 'tack.sidebar.collapsed';
@@ -112,6 +113,7 @@ export function Sidebar() {
       <nav className={styles.nav} aria-label="Main">
         <NavItem to="/today" label="Today" collapsed={collapsed}>
           <Sun />
+          <TodayBadge className={styles.todayBadge} />
         </NavItem>
         <NavItem to="/calendar" label="Calendar" collapsed={collapsed}>
           <CalendarDays />

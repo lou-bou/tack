@@ -7,3 +7,7 @@ coverage
 data
 backups
 *.md
+docs
+e2e
+test-results
+playwright-report

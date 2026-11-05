@@ -24,7 +24,7 @@ The toolchain and deployment copy Cairn, because it already runs on the same Thi
 | Other | `lucide-react`, Geist from `@fontsource`, `fractional-indexing` | Named in the design, or the obvious fit. |
 | Quality | Vitest, fast-check, fake-indexeddb, Playwright, axe-core, ESLint, Prettier | Cairn's set plus the sync test tools. |
 | Token enforcement | Cairn's `stylelint.config.js`, adapted | Makes "no hard-coded values" (SPEC §5) a lint failure instead of a review item. |
-| Backups | Cairn's `backup/` container (Alpine, sqlite3, rclone, supercronic) | Already written and tested. It needs renaming, not redesigning. |
+| Backups | Cairn's `backup/` container (Alpine, sqlite3, rclone, supercronic) | Already written and tested. Restore also sets a new database epoch, because a server that goes back in time would otherwise leave synced devices silently out of step. |
 
 ## 2. Key technical decisions
 
@@ -78,7 +78,7 @@ The toolchain and deployment copy Cairn, because it already runs on the same Thi
 
 **Settings.** Theme and density sync like any other row, and are mirrored to `localStorage` so an inline script can set the theme before first paint and avoid a flash.
 
-**Client updates.** Pushes and pulls carry a protocol version. A client that's too old holds its queue and reloads to the new worker. Dexie schema versions upgrade without touching `outbox`.
+**Client updates.** Pushes and pulls carry a protocol version. A client that's too old holds its queue and reloads to the new worker. Dexie schema versions upgrade without touching `outbox`. A new version never takes over by itself, since that would delete files an open page needs and reload it mid-edit: it waits until you leave the app or tap the pill.
 
 ## 3. Repo layout
 
@@ -119,7 +119,7 @@ Each step ends with a working app and a commit. The order puts risk first: anyth
 
 **Manual device checks.** Automated tests can't cover real push delivery, haptics, PWA install, long-press feel or phone performance. Steps 1, 6 and 11 need you to try them on your phone.
 
-**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Steps 4 to 12 are done. The step 6 performance gate passed under 4x and 6x CPU throttling; Lou's check on the real phone is still to come.
+**Status.** Steps 1 to 3 are done. Lou's device test through Access passed on a real phone: install, service worker, server, realtime stream, offline queue and resend, and test push. Still to confirm on a device: two-device realtime, the stream staying connected for several minutes, and tapping a notification with the app closed. Steps 4 to 15 are done. The step 6 performance gate passed under 4x and 6x CPU throttling; Lou's check on the real phone is still to come.
 
 ## 5. Places the spec needed interpreting
 

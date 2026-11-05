@@ -1,11 +1,13 @@
 import {
   byPosition,
+  cardRestorePlan,
   newId,
   positionAtEnd,
   type BoardColor,
   type BoardFields,
   type CardFields,
   type ListFields,
+  type TrashKind,
 } from '@tack/shared';
 import { db, store } from './index';
 
@@ -96,3 +98,27 @@ export const trashCard = (id: string) =>
   store.update('cards', id, { deletedAt: new Date().toISOString() });
 
 export const restoreCard = (id: string) => store.update('cards', id, { deletedAt: null });
+
+/** Brings an item back from Trash. Lists and boards bring their cards with them. */
+export async function restoreFromTrash(kind: TrashKind, id: string): Promise<void> {
+  if (kind === 'board') return void (await restoreBoard(id));
+  if (kind === 'list') return void (await restoreList(id));
+
+  const card = await db.cards.get(id);
+  if (!card) return;
+  const lists = await db.lists.where('boardId').equals(card.boardId).toArray();
+  const plan = cardRestorePlan(card, lists);
+  if (plan.kind === 'inPlace') return void (await restoreCard(id));
+
+  const listId = plan.kind === 'moveTo' ? plan.listId : await createList(card.boardId, 'Restored');
+  const siblings = (await db.cards.where('listId').equals(listId).toArray()).sort(byPosition);
+  await store.update('cards', id, {
+    listId,
+    position: positionAtEnd(siblings),
+    deletedAt: null,
+  });
+}
+
+const TABLE_OF = { board: 'boards', list: 'lists', card: 'cards' } as const;
+
+export const purgeForever = (kind: TrashKind, id: string) => store.purge(TABLE_OF[kind], id);

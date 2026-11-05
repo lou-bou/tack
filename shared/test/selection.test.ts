@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cardRestorePlan,
   isCardLive,
+  selectTrash,
   selectToday,
   todayBadgeCount,
   todayReason,
@@ -196,5 +198,74 @@ describe('trash days left', () => {
     expect(trashDaysLeft(new Date(NOW).toISOString(), NOW)).toBe(30);
     expect(trashDaysLeft(new Date(NOW).toISOString(), NOW + 86_400_000 * 29)).toBe(1);
     expect(trashDaysLeft(new Date(NOW).toISOString(), NOW + 86_400_000 * 40)).toBe(0);
+  });
+});
+
+describe('selectTrash', () => {
+  const T = '2026-11-01T10:00:00.000Z';
+  const NOW = new Date('2026-11-05T12:00:00.000Z').getTime();
+  const board = (id: string, deletedAt: string | null = null) =>
+    ({ id, name: `B-${id}`, deletedAt, position: 'a0' }) as Board;
+  const list = (id: string, boardId: string, deletedAt: string | null = null) =>
+    ({ id, boardId, name: `L-${id}`, deletedAt, position: 'a0' }) as List;
+  const card = (id: string, listId: string, deletedAt: string | null, boardId = 'b1') =>
+    ({ id, listId, boardId, title: `C-${id}`, deletedAt, position: 'a0' }) as Card;
+
+  it('lists only what was deleted directly, newest first, with its origin', () => {
+    const rows = selectTrash(
+      [board('b1')],
+      [list('l1', 'b1'), list('l2', 'b1', '2026-11-03T00:00:00.000Z')],
+      [
+        card('c1', 'l1', T),
+        card('live', 'l1', null),
+        card('inGone', 'l2', null), // Goes with its list, so no row of its own.
+      ],
+      NOW,
+    );
+    expect(rows.map((r) => r.id)).toEqual(['l2', 'c1']);
+    expect(rows[0]).toMatchObject({ kind: 'list', where: 'B-b1', cardCount: 1, needsBoard: false });
+    expect(rows[1]).toMatchObject({ kind: 'card', where: 'B-b1 / L-l1', daysLeft: 26 });
+  });
+
+  it('says a child needs its board back first', () => {
+    const rows = selectTrash([board('b1', T)], [list('l1', 'b1', T)], [card('c1', 'l1', T)], NOW);
+    expect(rows.find((r) => r.kind === 'board')?.needsBoard).toBe(false);
+    expect(rows.find((r) => r.kind === 'list')?.needsBoard).toBe(true);
+    expect(rows.find((r) => r.kind === 'card')?.needsBoard).toBe(true);
+  });
+
+  it('counts a board by its live cards, and drops rows whose board was purged', () => {
+    const rows = selectTrash(
+      [board('b1', T)],
+      [list('l1', 'b1')],
+      [card('c1', 'l1', null), card('c2', 'l1', null), card('orphan', 'x', T, 'purged')],
+      NOW,
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ kind: 'board', cardCount: 2 });
+  });
+
+  it('names just the board when the card outlived its list', () => {
+    const [row] = selectTrash([board('b1')], [], [card('c1', 'purgedList', T)], NOW);
+    expect(row?.where).toBe('B-b1');
+  });
+});
+
+describe('cardRestorePlan', () => {
+  const list = (id: string, position: string, deletedAt: string | null = null) =>
+    ({ id, position, deletedAt }) as List;
+
+  it('stays in its own list while that is live', () => {
+    expect(cardRestorePlan({ listId: 'a' }, [list('a', 'a0')])).toEqual({ kind: 'inPlace' });
+  });
+
+  it('goes to the first live list when its list is purged or in Trash', () => {
+    const lists = [list('t', 'a0', 'x'), list('second', 'a2'), list('first', 'a1')];
+    expect(cardRestorePlan({ listId: 'gone' }, lists)).toEqual({ kind: 'moveTo', listId: 'first' });
+    expect(cardRestorePlan({ listId: 't' }, lists)).toEqual({ kind: 'moveTo', listId: 'first' });
+  });
+
+  it('asks for a new list when the board has none', () => {
+    expect(cardRestorePlan({ listId: 'x' }, [])).toEqual({ kind: 'newList' });
   });
 });

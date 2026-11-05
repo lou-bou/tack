@@ -1,6 +1,7 @@
 import type { Density, Theme } from '@tack/shared';
 import { Screen } from '../components/Screen';
 import { Segmented } from '../components/Segmented';
+import { TrashSection } from '../components/TrashSection';
 import { setDensity, setTheme, useAppearance } from '../lib/appearance';
 import styles from './Settings.module.css';
 
@@ -44,6 +45,7 @@ export function SettingsPage() {
           />
         </div>
       </section>
+      <TrashSection />
     </Screen>
   );
 }

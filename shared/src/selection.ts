@@ -97,3 +97,96 @@ export function trashDaysLeft(deletedAt: string, now: number): number {
   const deletedOn = todayString(new Date(deletedAt).getTime());
   return Math.max(0, TRASH_DAYS - daysBetween(deletedOn, todayString(now)));
 }
+
+export type TrashKind = 'board' | 'list' | 'card';
+
+/** One row per item deleted directly. Its children come back with it, so they have no row. */
+export interface TrashRow {
+  kind: TrashKind;
+  id: string;
+  name: string;
+  /** Where it came from, empty for a board. */
+  where: string;
+  deletedAt: string;
+  daysLeft: number;
+  /** Live cards that go and come back with this list or board. */
+  cardCount: number;
+  /** A list or card can't come back while its board is in Trash. */
+  needsBoard: boolean;
+}
+
+/** Everything in Trash, newest first (SPEC §3.9). */
+export function selectTrash(
+  boards: readonly Board[],
+  lists: readonly List[],
+  cards: readonly Card[],
+  now: number,
+): TrashRow[] {
+  const boardById = new Map(boards.map((b) => [b.id, b]));
+  const listById = new Map(lists.map((l) => [l.id, l]));
+  const rows: TrashRow[] = [];
+
+  for (const board of boards) {
+    if (!board.deletedAt) continue;
+    rows.push({
+      kind: 'board',
+      id: board.id,
+      name: board.name,
+      where: '',
+      deletedAt: board.deletedAt,
+      daysLeft: trashDaysLeft(board.deletedAt, now),
+      cardCount: cards.filter((c) => c.boardId === board.id && !c.deletedAt).length,
+      needsBoard: false,
+    });
+  }
+  for (const list of lists) {
+    const board = boardById.get(list.boardId);
+    // No board row means it was purged here, and this row's tombstone just hasn't arrived yet.
+    if (!list.deletedAt || !board) continue;
+    rows.push({
+      kind: 'list',
+      id: list.id,
+      name: list.name,
+      where: board.name,
+      deletedAt: list.deletedAt,
+      daysLeft: trashDaysLeft(list.deletedAt, now),
+      cardCount: cards.filter((c) => c.listId === list.id && !c.deletedAt).length,
+      needsBoard: !!board.deletedAt,
+    });
+  }
+  for (const card of cards) {
+    const board = boardById.get(card.boardId);
+    if (!card.deletedAt || !board) continue;
+    const list = listById.get(card.listId);
+    rows.push({
+      kind: 'card',
+      id: card.id,
+      name: card.title,
+      where: list ? `${board.name} / ${list.name}` : board.name,
+      deletedAt: card.deletedAt,
+      daysLeft: trashDaysLeft(card.deletedAt, now),
+      cardCount: 0,
+      needsBoard: !!board.deletedAt,
+    });
+  }
+  return rows.sort((a, b) =>
+    a.deletedAt === b.deletedAt ? a.id.localeCompare(b.id) : a.deletedAt < b.deletedAt ? 1 : -1,
+  );
+}
+
+export type CardRestorePlan =
+  { kind: 'inPlace' } | { kind: 'moveTo'; listId: string } | { kind: 'newList' };
+
+/**
+ * Where a card goes back to: its own list if that's live, otherwise the board's first live list.
+ * A board with no lists left gets a new one (PLAN §5).
+ */
+export function cardRestorePlan(
+  card: Pick<Card, 'listId'>,
+  boardLists: readonly List[],
+): CardRestorePlan {
+  const live = boardLists.filter((l) => !l.deletedAt).sort(byPosition);
+  if (live.some((l) => l.id === card.listId)) return { kind: 'inPlace' };
+  const first = live[0];
+  return first ? { kind: 'moveTo', listId: first.id } : { kind: 'newList' };
+}

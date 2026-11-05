@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { PROTOCOL_VERSION, type Change, type PullResponse, type PushResponse } from '@tack/shared';
 import { buildApp } from '../src/app.js';
+import { applyChanges, pullChanges, purgeExpired } from '../src/sync.js';
 
 const T = '2026-01-01T00:00:00.000Z';
 const CLOCK = '0000000001000:0000:a';
@@ -301,5 +302,86 @@ describe('sync routes', () => {
       url: `/api/sync/pull?since=0&protocol=${PROTOCOL_VERSION + 1}`,
     });
     expect(pullRes.statusCode).toBe(426);
+  });
+});
+
+describe('purgeExpired', () => {
+  const DAY = 86_400_000;
+  const NOW = new Date('2026-11-05T12:00:00.000Z').getTime();
+  const ago = (days: number) => new Date(NOW - days * DAY).toISOString();
+  let app: FastifyInstance;
+
+  beforeEach(async () => {
+    app = await buildApp({
+      host: '127.0.0.1',
+      port: 0,
+      dbPath: ':memory:',
+      webDist: '/nonexistent',
+      vapid: null,
+    });
+  });
+  afterEach(async () => {
+    await app.close();
+  });
+
+  const seed = (changes: Change[]) => applyChanges(app.db, changes, NOW);
+  const exists = (table: string, id: string) =>
+    !!app.db.prepare(`SELECT 1 FROM ${table} WHERE id = ?`).get(id);
+  const board = insert('boards', 'b1', boardFields);
+  const list = insert('lists', 'l1', listFields);
+
+  it('removes items after 30 days and leaves younger ones', () => {
+    seed([
+      board,
+      list,
+      insert('cards', 'old', { ...cardFields, deletedAt: ago(30) }),
+      insert('cards', 'young', { ...cardFields, deletedAt: ago(29) }),
+      insert('cards', 'live', cardFields),
+    ]);
+    expect(purgeExpired(app.db, NOW)).toBe(true);
+    expect(exists('cards', 'old')).toBe(false);
+    expect(exists('cards', 'young')).toBe(true);
+    expect(exists('cards', 'live')).toBe(true);
+    expect(purgeExpired(app.db, NOW)).toBe(false);
+  });
+
+  it('tells other devices through tombstones', () => {
+    seed([board, list, insert('cards', 'old', { ...cardFields, deletedAt: ago(31) })]);
+    const before = pullChanges(app.db, 0, NOW).seq;
+    purgeExpired(app.db, NOW);
+    const { tombstones, seq } = pullChanges(app.db, before, NOW);
+    expect(seq).toBeGreaterThan(before);
+    expect(tombstones).toEqual([{ table: 'cards', id: 'old' }]);
+  });
+
+  it('a purged list takes its live cards but not one trashed on its own', () => {
+    seed([
+      board,
+      insert('lists', 'l1', { ...listFields, deletedAt: ago(31) }),
+      insert('cards', 'with', cardFields),
+      insert('cards', 'alone', { ...cardFields, deletedAt: ago(5) }),
+    ]);
+    purgeExpired(app.db, NOW);
+    expect(exists('lists', 'l1')).toBe(false);
+    expect(exists('cards', 'with')).toBe(false);
+    expect(exists('cards', 'alone')).toBe(true);
+  });
+
+  it('a purged board takes everything in it', () => {
+    seed([
+      insert('boards', 'b1', { ...boardFields, deletedAt: ago(30) }),
+      list,
+      insert('cards', 'c', cardFields),
+      insert('cards', 'trashed', { ...cardFields, deletedAt: ago(1) }),
+    ]);
+    purgeExpired(app.db, NOW);
+    for (const [t, id] of [
+      ['boards', 'b1'],
+      ['lists', 'l1'],
+      ['cards', 'c'],
+      ['cards', 'trashed'],
+    ] as const) {
+      expect(exists(t, id)).toBe(false);
+    }
   });
 });

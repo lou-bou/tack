@@ -4,6 +4,7 @@ import {
   clampHlc,
   fieldNames,
   mergeChange,
+  trashDaysLeft,
   type Change,
   type PullResponse,
   type PushResponse,
@@ -154,6 +155,25 @@ export function applyChanges(db: Db, changes: Change[], now: number): ApplyResul
     }
 
     return { seq: seq ?? currentSeq(db), serverTime: now, rejected, changed: seq !== null };
+  })();
+}
+
+/** Deletes anything whose 30 days in Trash are up. Each item's time runs from its own deletion. */
+export function purgeExpired(db: Db, now: number): boolean {
+  return db.transaction(() => {
+    let seq: number | null = null;
+    for (const table of PURGEABLE) {
+      // Purging a board or list can already have removed the later rows, hence the second check.
+      const found = db
+        .prepare(`SELECT id, deletedAt FROM ${table} WHERE deletedAt IS NOT NULL`)
+        .all() as { id: string; deletedAt: string }[];
+      for (const { id, deletedAt } of found) {
+        if (trashDaysLeft(deletedAt, now) > 0 || !readRow(db, table, id)) continue;
+        seq ??= bumpSeq(db);
+        purgeRow(db, table, id, seq);
+      }
+    }
+    return seq !== null;
   })();
 }
 

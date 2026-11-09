@@ -122,7 +122,9 @@ One screen answering "what do I have to do today", across all boards. It include
 
 Cards are grouped by board (board emoji + name as the group header, in board order). Inside a group: overdue first, then by due time (cards with a time before date-only ones), then by priority (urgent → none). Each row is a normal card face plus its list name; ticking the checkbox completes it in place with Undo. Tapping opens the card panel. Empty state: a short line saying nothing is due today.
 
-The Today tab/sidebar item shows a badge with the number of overdue + due-today cards.
+**Planned for today** (added after the first release): any card can also be put on Today by hand, whatever its dates. A board's **Select** mode picks several cards at once, across its lists, and **Plan for today** plans them all; the card panel does one at a time. A plan carries over until the card is completed or taken off, and Today notes it ("Planned 3 days ago"). Planned cards sort after the dated ones, longest-waiting first, then by priority, and show a sun icon on their card face. On Today, Select mode takes planned cards off; cards there because of their dates can't be taken off.
+
+The Today tab/sidebar item shows a badge with the number of overdue, due-today and planned cards.
 
 ### 3.7 Calendar
 - **Month** and **Week** views, toggled with a segmented control (remember the last choice). Weeks start on Sunday. Today is highlighted. Arrows move back and forward; a **Today** button returns.

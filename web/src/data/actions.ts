@@ -79,6 +79,7 @@ export async function createCard(
     priority: 'none',
     completed: false,
     completedAt: null,
+    plannedFor: null,
     ...timestamps(),
     ...extra,
   });
@@ -122,3 +123,28 @@ export async function restoreFromTrash(kind: TrashKind, id: string): Promise<voi
 const TABLE_OF = { board: 'boards', list: 'lists', card: 'cards' } as const;
 
 export const purgeForever = (kind: TrashKind, id: string) => store.purge(TABLE_OF[kind], id);
+
+/**
+ * Plans cards for a day, or takes them off with null. Returns what each had before, for Undo.
+ * Cards already planned for an earlier day keep that day, so "Planned 3 days ago" stays true.
+ */
+export async function setPlanned(
+  ids: readonly string[],
+  day: string | null,
+): Promise<Map<string, string | null>> {
+  const before = new Map<string, string | null>();
+  for (const id of ids) {
+    const card = await db.cards.get(id);
+    if (!card) continue;
+    const current = card.plannedFor ?? null;
+    before.set(id, current);
+    const next = day !== null && current !== null && current <= day ? current : day;
+    if (next !== current) await store.update('cards', id, { plannedFor: next });
+  }
+  return before;
+}
+
+/** Puts back what setPlanned returned. */
+export async function restorePlanned(before: ReadonlyMap<string, string | null>): Promise<void> {
+  for (const [id, plannedFor] of before) await store.update('cards', id, { plannedFor });
+}

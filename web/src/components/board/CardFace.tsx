@@ -7,10 +7,12 @@ import {
   Clock,
   Equal,
   Flag,
+  Sun,
   FileText,
 } from 'lucide-react';
-import { dueState, formatChip, type Card, type Priority } from '@tack/shared';
+import { dueState, formatChip, isPlanned, type Card, type Priority } from '@tack/shared';
 import { useCardPanel } from '../../lib/cardPanel';
+import { useSelectionContext } from '../../lib/selection';
 import { UnsentMarker } from '../../lib/unsent';
 import styles from './CardFace.module.css';
 
@@ -67,6 +69,28 @@ export function DateChip({
   );
 }
 
+function CardMeta({ card, now, listName }: { card: Card; now: number; listName?: string }) {
+  return (
+    // Hidden by CSS when nothing in it renders.
+    <div className={styles.meta}>
+      {isPlanned(card, now) && (
+        <span className={styles.planned} role="img" aria-label="Planned for today">
+          <Sun />
+        </span>
+      )}
+      <PriorityIcon priority={card.priority} />
+      <DateChip card={card} now={now} />
+      {card.description && (
+        <span className={styles.described} role="img" aria-label="Has description">
+          <FileText />
+        </span>
+      )}
+      {listName && <span className={styles.listName}>{listName}</span>}
+      <UnsentMarker cardId={card.id} className={styles.described} />
+    </div>
+  );
+}
+
 function CardFaceInner({
   card,
   now,
@@ -82,8 +106,51 @@ function CardFaceInner({
   onToggle: (card: { id: string; completed: boolean }, willHide: boolean) => void;
 }) {
   const { open } = useCardPanel();
+  const selection = useSelectionContext();
   // The pop and the strike-through sweep play for a tick you just made, not on every render.
   const [justTicked, setJustTicked] = useState(false);
+
+  if (selection?.selecting) {
+    const isSelected = selection.selected.has(card.id);
+    const selectable = selection.canSelect(card);
+    const pick = () => {
+      if (selectable) selection.toggle(card.id);
+    };
+    return (
+      <article
+        className={`${styles.card} ${styles.selecting} ${isSelected ? styles.selected : ''} ${
+          selectable ? '' : styles.unselectable
+        }`}
+      >
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={isSelected}
+          aria-label={`Select ${card.title}`}
+          disabled={!selectable}
+          className={styles.check}
+          onClick={pick}
+        >
+          <span className={`${styles.box} ${isSelected ? styles.selectedBox : ''}`}>
+            {isSelected && <Check />}
+          </span>
+        </button>
+        <div className={styles.content}>
+          {/* Tapping anywhere on the card picks it, while selecting. */}
+          <button
+            type="button"
+            className={styles.title}
+            tabIndex={-1}
+            disabled={!selectable}
+            onClick={pick}
+          >
+            <span className={styles.titleText}>{card.title}</span>
+          </button>
+          <CardMeta card={card} now={now} listName={listName} />
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article
@@ -108,18 +175,7 @@ function CardFaceInner({
         <button type="button" className={styles.title} onClick={() => open(card.id)}>
           <span className={styles.titleText}>{card.title}</span>
         </button>
-        {/* Hidden by CSS when nothing in it renders. */}
-        <div className={styles.meta}>
-          <PriorityIcon priority={card.priority} />
-          <DateChip card={card} now={now} />
-          {card.description && (
-            <span className={styles.described} role="img" aria-label="Has description">
-              <FileText />
-            </span>
-          )}
-          {listName && <span className={styles.listName}>{listName}</span>}
-          <UnsentMarker cardId={card.id} className={styles.described} />
-        </div>
+        <CardMeta card={card} now={now} listName={listName} />
       </div>
     </article>
   );
@@ -154,6 +210,7 @@ export const CardFace = memo(
     a.card.title === b.card.title &&
     a.card.completed === b.card.completed &&
     a.card.priority === b.card.priority &&
+    a.card.plannedFor === b.card.plannedFor &&
     !a.card.description === !b.card.description &&
     sameDate(a.card.start, b.card.start) &&
     sameDate(a.card.due, b.card.due),

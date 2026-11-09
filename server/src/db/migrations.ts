@@ -122,4 +122,9 @@ export const MIGRATIONS: Migration[] = [
       );
     `,
   },
+  {
+    version: 4,
+    name: 'planned for today',
+    sql: `ALTER TABLE cards ADD COLUMN plannedFor TEXT;`,
+  },
 ];

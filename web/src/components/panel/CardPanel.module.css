@@ -189,6 +189,10 @@
   color: var(--success);
 }
 
+.planButton {
+  align-self: flex-start;
+}
+
 .editorLoading {
   min-height: var(--tile-height);
   border: var(--border-width) solid var(--border);

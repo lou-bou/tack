@@ -16,23 +16,51 @@ export function isCardLive(
   return !!board && !board.deletedAt;
 }
 
-export type TodayReason = 'overdue' | 'dueToday' | 'inProgress';
+export type TodayReason = 'overdue' | 'dueToday' | 'inProgress' | 'planned';
 
-/** Why a card belongs on Today, or null if it doesn't (SPEC §3.6). */
-export function todayReason(
-  card: { completed: boolean; start: DateValue | null; due: DateValue | null },
-  now: number,
-): TodayReason | null {
-  if (card.completed || !card.due) return null;
-  const today = todayString(now);
-  if (isOverdue(card.due, now)) return 'overdue';
-  if (card.due.date === today) return 'dueToday';
-  if (card.start && card.start.date <= today && card.due.date > today) return 'inProgress';
-  return null;
+type TodayCard = {
+  completed: boolean;
+  start: DateValue | null;
+  due: DateValue | null;
+  /** Missing on rows synced before the field existed, which is the same as null. */
+  plannedFor?: string | null;
+};
+
+/** Put on Today by hand, on or before today. A plan carries over until done or taken off. */
+export function isPlanned(card: TodayCard, now: number): boolean {
+  return !card.completed && !!card.plannedFor && card.plannedFor <= todayString(now);
 }
 
-/** Overdue first, then by due time with timed cards before date-only, then by priority. */
+/** Why a card belongs on Today, or null if it doesn't (SPEC §3.6). Dates win over a plan. */
+export function todayReason(card: TodayCard, now: number): TodayReason | null {
+  if (card.completed) return null;
+  const today = todayString(now);
+  if (card.due) {
+    if (isOverdue(card.due, now)) return 'overdue';
+    if (card.due.date === today) return 'dueToday';
+    if (card.start && card.start.date <= today && card.due.date > today) return 'inProgress';
+  }
+  return isPlanned(card, now) ? 'planned' : null;
+}
+
+const byPriority = (a: Card, b: Card) =>
+  // PRIORITIES runs none → urgent, and urgent sorts first.
+  PRIORITIES.indexOf(b.priority) - PRIORITIES.indexOf(a.priority);
+
+/**
+ * Overdue first, then by due time with timed cards before date-only, then by priority. Cards only
+ * there because they were planned come after, longest-waiting first.
+ */
 export function compareToday(a: Card, b: Card, now: number): number {
+  const aPlanned = todayReason(a, now) === 'planned';
+  const bPlanned = todayReason(b, now) === 'planned';
+  if (aPlanned !== bPlanned) return aPlanned ? 1 : -1;
+  if (aPlanned) {
+    const aDay = a.plannedFor ?? '';
+    const bDay = b.plannedFor ?? '';
+    if (aDay !== bDay) return aDay < bDay ? -1 : 1;
+    return byPriority(a, b) || byPosition(a, b);
+  }
   const aDue = a.due as DateValue;
   const bDue = b.due as DateValue;
   const overdue = Number(isOverdue(bDue, now)) - Number(isOverdue(aDue, now));
@@ -40,10 +68,7 @@ export function compareToday(a: Card, b: Card, now: number): number {
   if (aDue.date !== bDue.date) return aDue.date < bDue.date ? -1 : 1;
   if (!aDue.time !== !bDue.time) return aDue.time ? -1 : 1;
   if (aDue.time && bDue.time && aDue.time !== bDue.time) return aDue.time < bDue.time ? -1 : 1;
-  // PRIORITIES runs none → urgent, and urgent sorts first.
-  const priority = PRIORITIES.indexOf(b.priority) - PRIORITIES.indexOf(a.priority);
-  if (priority !== 0) return priority;
-  return byPosition(a, b);
+  return byPriority(a, b) || byPosition(a, b);
 }
 
 export interface TodayGroup {
@@ -76,7 +101,7 @@ export function selectToday(
     }));
 }
 
-/** The Today badge: overdue plus due today, leaving out cards that are only in progress. */
+/** The Today badge: overdue, due today and planned, leaving out cards that are only in progress. */
 export function todayBadgeCount(
   boards: readonly Board[],
   lists: readonly List[],
@@ -88,7 +113,7 @@ export function todayBadgeCount(
   return cards.filter((card) => {
     if (!isCardLive(card, listById, boardById)) return false;
     const reason = todayReason(card, now);
-    return reason === 'overdue' || reason === 'dueToday';
+    return reason === 'overdue' || reason === 'dueToday' || isPlanned(card, now);
   }).length;
 }
 

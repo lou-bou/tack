@@ -46,6 +46,11 @@ const cardFields = {
   priority: z.enum(PRIORITIES),
   completed: z.boolean(),
   completedAt: isoTime.nullable(),
+  /** The day it was put on Today by hand. It stays there until done or taken off. */
+  plannedFor: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable(),
   createdAt: isoTime,
   updatedAt: isoTime,
   deletedAt: isoTime.nullable(),
@@ -76,6 +81,14 @@ export const TABLE_SCHEMAS = {
 };
 
 export type TableName = keyof typeof TABLE_SCHEMAS;
+
+/**
+ * Values for fields added after release. A version of the app from before a field existed can still
+ * create rows, and the server fills the field in rather than refusing them.
+ */
+export const FIELD_DEFAULTS: Partial<Record<TableName, Record<string, unknown>>> = {
+  cards: { plannedFor: null },
+};
 export const TABLE_NAMES = Object.keys(TABLE_SCHEMAS) as TableName[];
 
 export type BoardFields = z.infer<typeof TABLE_SCHEMAS.boards>;

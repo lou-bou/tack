@@ -4,6 +4,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import type { Card, List } from '@tack/shared';
 import { restoreList, trashList, updateList } from '../../data/actions';
+import { useSelectionContext } from '../../lib/selection';
 import { Menu } from '../Menu';
 import { useToast } from '../Toast';
 import { CardFace, CardSlot } from './CardFace';
@@ -63,10 +64,11 @@ function SortableCard({
   onToggle: OnToggle;
 }) {
   const data = useMemo(() => ({ type: 'card' as const, listId }), [listId]);
+  const selecting = useSelectionContext()?.selecting ?? false;
   const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({
     id: card.id,
     data,
-    disabled: leaving,
+    disabled: leaving || selecting,
   });
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
@@ -108,9 +110,11 @@ export const ListColumn = memo(function ListColumn({
   const [composing, setComposing] = useState(false);
   const body = useRef<HTMLUListElement>(null);
   const toast = useToast();
+  const selecting = useSelectionContext()?.selecting ?? false;
   const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({
     id: list.id,
     data: LIST_DATA,
+    disabled: selecting,
   });
   const ids = useMemo(() => cards.map((card) => card.id), [cards]);
   // A card on its way out no longer counts.

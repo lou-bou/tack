@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useRef, useState, type TouchEvent } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowDown, ArrowUp, Check, Clock, Flag, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, Clock, Flag, Sun, Trash2, X } from 'lucide-react';
 import { useSearchParams } from 'react-router';
 import {
   DEFAULT_DUE_TIME,
@@ -10,6 +10,7 @@ import {
   dueState,
   formatDateValue,
   formatTimestamp,
+  isPlanned,
   positionAtEnd,
   startAfterDue,
   type Card,
@@ -19,6 +20,7 @@ import { db } from '../../data';
 import { restoreCard, setCardCompleted, trashCard, updateCard } from '../../data/actions';
 import { boardTitle, useNow } from '../../lib/boards';
 import { useCardPanel } from '../../lib/cardPanel';
+import { usePlanning } from '../../lib/planning';
 import { useFirstSyncDone } from '../../lib/synced';
 import { Button, IconButton } from '../Button';
 import { useToast } from '../Toast';
@@ -114,6 +116,7 @@ function Details({ card }: { card: Card }) {
   }, [card.boardId, card.listId]);
   const now = useNow();
   const toast = useToast();
+  const plan = usePlanning();
   const { close } = useCardPanel();
   const [picking, setPicking] = useState<'start' | 'due' | null>(null);
 
@@ -201,6 +204,14 @@ function Details({ card }: { card: Card }) {
             onOpen={() => setPicking('due')}
           />
         </div>
+        <Button
+          className={styles.planButton}
+          aria-pressed={isPlanned(card, now)}
+          onClick={() => void plan([card.id], !isPlanned(card, now))}
+        >
+          <Sun />
+          {isPlanned(card, now) ? 'Remove from today' : 'Plan for today'}
+        </Button>
         {picking === 'start' && (
           <DatePicker
             label="Start date"

@@ -214,3 +214,32 @@
     opacity: 0;
   }
 }
+
+.planned {
+  display: inline-flex;
+  color: var(--ink-2);
+}
+
+.selecting {
+  cursor: pointer;
+}
+
+.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.selectedBox {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.unselectable {
+  opacity: 0.55;
+}
+
+.unselectable .title,
+.unselectable .check {
+  cursor: default;
+}

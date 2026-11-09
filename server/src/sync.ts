@@ -1,4 +1,5 @@
 import {
+  FIELD_DEFAULTS,
   TABLE_NAMES,
   TABLE_SCHEMAS,
   clampHlc,
@@ -167,8 +168,9 @@ export function applyChanges(db: Db, changes: Change[], now: number): ApplyResul
           .filter(([field]) => allowed.has(field))
           .map(([field, clock]) => [field, clampHlc(clock, now)]),
       );
-      const { row, changed } = mergeChange(existing, { ...change, clocks });
-      if (!changed) continue;
+      const merged = mergeChange(existing, { ...change, clocks });
+      if (!merged.changed) continue;
+      const row: Row = { ...FIELD_DEFAULTS[table], ...merged.row };
 
       const { id: _id, clocks: _clocks, ...fields } = row;
       const valid = TABLE_SCHEMAS[table].safeParse(fields);

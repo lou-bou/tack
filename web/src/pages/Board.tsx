@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DndContext, DragOverlay, MeasuringStrategy } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { Eye, EyeOff, Plus } from 'lucide-react';
+import { Eye, EyeOff, ListChecks, Plus, Sun } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { Button } from '../components/Button';
 import { BoardMenu } from '../components/BoardSheets';
+import { SelectionBar } from '../components/SelectionBar';
 import { EmptyState } from '../components/EmptyState';
 import { Screen } from '../components/Screen';
 import { CardFace } from '../components/board/CardFace';
@@ -15,6 +16,8 @@ import { boardTitle, useBoardView, useNow } from '../lib/boards';
 import { useBoardDrag } from '../lib/boardDrag';
 import { useCompletion } from '../lib/completion';
 import { boardCollision, useDragSensors } from '../lib/dnd';
+import { usePlanning } from '../lib/planning';
+import { SelectionProvider, useSelection } from '../lib/selection';
 import { useFirstSyncDone } from '../lib/synced';
 import fieldStyles from '../components/Field.module.css';
 import columnStyles from '../components/board/ListColumn.module.css';
@@ -73,6 +76,8 @@ export function BoardPage() {
   const now = useNow();
   const navigate = useNavigate();
   const { lingering, toggle } = useCompletion();
+  const selection = useSelection();
+  const plan = usePlanning();
   const scroller = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const currentRef = useRef(0);
@@ -135,6 +140,10 @@ export function BoardPage() {
   const activeList =
     active?.type === 'list' ? lists.find((l) => l.list.id === active.id) : undefined;
 
+  const anyPlanned = lists.some(({ cards }) =>
+    cards.some((card) => selection.selected.has(card.id) && card.plannedFor),
+  );
+
   return (
     <Screen
       title={boardTitle(board)}
@@ -142,6 +151,16 @@ export function BoardPage() {
       flush
       actions={
         <>
+          <button
+            type="button"
+            className={styles.toggle}
+            aria-pressed={selection.selecting}
+            title="Select cards"
+            onClick={selection.selecting ? selection.stop : selection.start}
+          >
+            <ListChecks />
+            <span className={styles.toggleLabel}>Select</span>
+          </button>
           <button
             type="button"
             className={styles.toggle}
@@ -156,55 +175,84 @@ export function BoardPage() {
         </>
       }
     >
-      <DndContext
-        sensors={sensors}
-        collisionDetection={collision}
-        measuring={MEASURING}
-        accessibility={{ announcements }}
-        autoScroll={{
-          // Phones page a whole list at a time from the screen edge instead.
-          canScroll: (element) =>
-            !(element === scroller.current && matchMedia('(width < 900px)').matches),
-        }}
-        {...handlers}
-      >
-        <ListStrip lists={lists.map((l) => l.list)} current={current} onJump={jumpTo} />
-        <div ref={scroller} className={`${styles.lists} ${active ? styles.dragging : ''}`}>
-          <SortableContext
-            items={lists.map((l) => l.list.id)}
-            strategy={horizontalListSortingStrategy}
-          >
-            {lists.map(({ list, cards }) => (
-              <ListColumn
-                key={list.id}
-                list={list}
-                cards={cards}
-                boardId={board.id}
-                showCompleted={board.showCompleted}
-                lingering={lingering}
-                now={now}
-                onToggle={toggle}
-              />
-            ))}
-          </SortableContext>
-          <div className={styles.addListSlot} data-list-column>
-            <AddList boardId={board.id} />
-          </div>
-        </div>
-        <DragOverlay>
-          {activeCard && (
-            <div className={columnStyles.liftedCard}>
-              <CardFace
-                card={activeCard}
-                now={now}
-                showCompleted={board.showCompleted}
-                onToggle={toggle}
-              />
+      <SelectionProvider value={selection.api}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={collision}
+          measuring={MEASURING}
+          accessibility={{ announcements }}
+          autoScroll={{
+            // Phones page a whole list at a time from the screen edge instead.
+            canScroll: (element) =>
+              !(element === scroller.current && matchMedia('(width < 900px)').matches),
+          }}
+          {...handlers}
+        >
+          <ListStrip lists={lists.map((l) => l.list)} current={current} onJump={jumpTo} />
+          <div ref={scroller} className={`${styles.lists} ${active ? styles.dragging : ''}`}>
+            <SortableContext
+              items={lists.map((l) => l.list.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              {lists.map(({ list, cards }) => (
+                <ListColumn
+                  key={list.id}
+                  list={list}
+                  cards={cards}
+                  boardId={board.id}
+                  showCompleted={board.showCompleted}
+                  lingering={lingering}
+                  now={now}
+                  onToggle={toggle}
+                />
+              ))}
+            </SortableContext>
+            <div className={styles.addListSlot} data-list-column>
+              <AddList boardId={board.id} />
             </div>
+          </div>
+          <DragOverlay>
+            {activeCard && (
+              <div className={columnStyles.liftedCard}>
+                <CardFace
+                  card={activeCard}
+                  now={now}
+                  showCompleted={board.showCompleted}
+                  onToggle={toggle}
+                />
+              </div>
+            )}
+            {activeList && (
+              <ListPreview list={activeList.list} cards={activeList.cards} now={now} />
+            )}
+          </DragOverlay>
+        </DndContext>
+      </SelectionProvider>
+      {selection.selecting && (
+        <SelectionBar count={selection.selected.size} onCancel={selection.stop}>
+          {anyPlanned && (
+            <Button
+              onClick={() => {
+                void plan([...selection.selected], false);
+                selection.stop();
+              }}
+            >
+              Remove from today
+            </Button>
           )}
-          {activeList && <ListPreview list={activeList.list} cards={activeList.cards} now={now} />}
-        </DragOverlay>
-      </DndContext>
+          <Button
+            variant="primary"
+            disabled={selection.selected.size === 0}
+            onClick={() => {
+              void plan([...selection.selected], true);
+              selection.stop();
+            }}
+          >
+            <Sun />
+            Plan for today
+          </Button>
+        </SelectionBar>
+      )}
     </Screen>
   );
 }

@@ -41,6 +41,7 @@ const card = (position: string) =>
     priority: 'none' as Priority,
     completed: false,
     completedAt: null,
+    plannedFor: null,
     createdAt: T,
     updatedAt: T,
     deletedAt: null,

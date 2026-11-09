@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   cardRestorePlan,
   isCardLive,
+  isPlanned,
   selectTrash,
   selectToday,
   todayBadgeCount,
@@ -56,6 +57,8 @@ function card(
     priority?: Priority;
     completed?: boolean;
     deletedAt?: string | null;
+    plannedFor?: string | null;
+    position?: string;
   } = {},
 ): Card {
   return {
@@ -71,6 +74,7 @@ function card(
     priority: 'none',
     completed: false,
     completedAt: null,
+    plannedFor: null,
     createdAt: T,
     updatedAt: T,
     deletedAt: null,
@@ -267,5 +271,76 @@ describe('cardRestorePlan', () => {
 
   it('asks for a new list when the board has none', () => {
     expect(cardRestorePlan({ listId: 'x' }, [])).toEqual({ kind: 'newList' });
+  });
+});
+
+describe('planned for today', () => {
+  const yesterday = '2026-11-04';
+  const today = '2026-11-05';
+  const tomorrow = '2026-11-06';
+
+  it('counts from the planned day on, and carries over until done', () => {
+    expect(todayReason(card('c', { listId: 'l', plannedFor: today }), NOW)).toBe('planned');
+    expect(todayReason(card('c', { listId: 'l', plannedFor: yesterday }), NOW)).toBe('planned');
+    expect(todayReason(card('c', { listId: 'l', plannedFor: tomorrow }), NOW)).toBeNull();
+    expect(
+      todayReason(card('c', { listId: 'l', plannedFor: today, completed: true }), NOW),
+    ).toBeNull();
+  });
+
+  it('treats a row synced before the field existed as unplanned', () => {
+    const { plannedFor: _unused, ...old } = card('c', { listId: 'l' });
+    expect(todayReason(old as Card, NOW)).toBeNull();
+    expect(isPlanned(old as Card, NOW)).toBe(false);
+  });
+
+  it('lets a date reason win, so a planned card due today sorts as due today', () => {
+    expect(todayReason(card('c', { listId: 'l', plannedFor: yesterday, due: d(today) }), NOW)).toBe(
+      'dueToday',
+    );
+  });
+
+  it('sorts planned-only cards after dated ones, longest-waiting first, then by priority', () => {
+    const groups = selectToday(
+      [board('b', 'a0')],
+      [list('l', 'b')],
+      [
+        card('newPlan', { listId: 'l', plannedFor: today, priority: 'urgent', position: 'a0' }),
+        card('oldPlan', { listId: 'l', plannedFor: yesterday, position: 'a1' }),
+        card('dated', { listId: 'l', due: d(today), position: 'a2' }),
+        card('samePlanHigh', { listId: 'l', plannedFor: today, priority: 'high', position: 'a3' }),
+        card('futureDueButPlanned', { listId: 'l', plannedFor: today, due: d('2026-11-20') }),
+      ],
+      NOW,
+    );
+    expect(groups[0]?.cards.map((c) => c.id)).toEqual([
+      'dated',
+      'oldPlan',
+      'newPlan',
+      'samePlanHigh',
+      'futureDueButPlanned',
+    ]);
+  });
+
+  it('adds planned cards to the badge, once each, even when also in progress', () => {
+    const count = todayBadgeCount(
+      [board('b', 'a0')],
+      [list('l', 'b')],
+      [
+        card('due', { listId: 'l', due: d(today) }),
+        card('plannedAndDue', { listId: 'l', due: d(today), plannedFor: today }),
+        card('planned', { listId: 'l', plannedFor: yesterday }),
+        card('progressOnly', { listId: 'l', start: d(yesterday), due: d(tomorrow) }),
+        card('progressPlanned', {
+          listId: 'l',
+          start: d(yesterday),
+          due: d(tomorrow),
+          plannedFor: today,
+        }),
+        card('donePlanned', { listId: 'l', plannedFor: today, completed: true }),
+      ],
+      NOW,
+    );
+    expect(count).toBe(4);
   });
 });

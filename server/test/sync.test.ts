@@ -385,3 +385,66 @@ describe('purgeExpired', () => {
     }
   });
 });
+
+describe('fields added after release', () => {
+  let app: FastifyInstance;
+
+  beforeEach(async () => {
+    app = await buildApp({
+      host: '127.0.0.1',
+      port: 0,
+      dbPath: ':memory:',
+      webDist: '/nonexistent',
+      vapid: null,
+    });
+  });
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('fills in plannedFor for a card from a version that predates it', () => {
+    const { rejected } = applyChanges(
+      app.db,
+      [
+        insert('boards', 'b1', boardFields),
+        insert('lists', 'l1', listFields),
+        insert('cards', 'old', cardFields),
+      ],
+      Date.now(),
+    );
+    expect(rejected).toEqual([]);
+    expect(pullChanges(app.db, 0, Date.now()).rows.cards?.[0]).toMatchObject({
+      id: 'old',
+      plannedFor: null,
+    });
+  });
+
+  it('syncs a plan and refuses a malformed one', () => {
+    const now = Date.now();
+    applyChanges(
+      app.db,
+      [
+        insert('boards', 'b1', boardFields),
+        insert('lists', 'l1', listFields),
+        insert('cards', 'c', cardFields),
+      ],
+      now,
+    );
+    const plan = (value: unknown, clock: string) =>
+      applyChanges(
+        app.db,
+        [
+          {
+            table: 'cards',
+            id: 'c',
+            fields: { plannedFor: value },
+            clocks: { plannedFor: clock },
+          },
+        ],
+        now,
+      );
+    expect(plan('2026-11-09', '0000000002000:0000:a').rejected).toEqual([]);
+    expect(pullChanges(app.db, 0, now).rows.cards?.[0]?.plannedFor).toBe('2026-11-09');
+    expect(plan('tomorrow', '0000000003000:0000:a').rejected).toHaveLength(1);
+  });
+});

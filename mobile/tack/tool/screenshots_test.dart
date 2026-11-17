@@ -161,7 +161,7 @@ void main() {
     await tester.tap(find.text('Week'));
     await settle(tester);
     await shot(tester, '12-calendar-week');
-    await tester.tap(find.bySemanticsLabel(RegExp('^Add a card due')).first);
+    await tester.tap(find.byTooltip(RegExp('^Add a card due')).first);
     await settle(tester);
     await shot(tester, '13-quick-add');
     await dismiss(tester);

@@ -8,7 +8,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tack/app.dart';
 import 'package:tack/data/dates.dart';
-import 'package:tack/data/store.dart';
 import 'package:tack/data/sync.dart';
 
 import 'fake_server.dart';

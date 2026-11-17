@@ -17,7 +17,9 @@ val hasReleaseKey = keyProperties.getProperty("storeFile") != null
 
 android {
     namespace = "me.boussaid.tack"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications and androidx.core 1.19 need API 37 to compile against. Only the
+    // compile level: targetSdk and minSdk stay at Flutter's defaults.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

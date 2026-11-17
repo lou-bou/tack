@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tack's background and logo colours (DESIGN.md). -->
+    <color name="tack_bg">#F4F5F8</color>
+    <color name="tack_card">#2E3350</color>
+    <color name="tack_pin">#5B8CFF</color>
+    <color name="tack_shine">#B9CCFF</color>
+    <color name="tack_line">#EDEBE6</color>
+    <color name="tack_line_done">#6B7090</color>
+    <color name="ic_launcher_background">#15161C</color>
+</resources>

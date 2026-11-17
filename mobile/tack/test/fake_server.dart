@@ -11,20 +11,29 @@ import 'package:tack/data/hlc.dart';
 import 'package:tack/data/merge.dart';
 import 'package:tack/data/store.dart';
 import 'package:tack/notify/notifier.dart';
+import 'package:tack/ui/state.dart';
 
-const testConnection = ServerConnection(
-  baseUrl: 'https://tack.test',
-  clientId: 'id.access',
-  clientSecret: 'secret',
-);
+const testConnection = ServerConnection(baseUrl: 'https://tack.test', clientId: 'id.access', clientSecret: 'secret');
 
 /// The fields of each synced table (shared/src/schema.ts).
 const tableFields = <String, List<String>>{
   'boards': ['name', 'emoji', 'color', 'showCompleted', 'position', 'createdAt', 'updatedAt', 'deletedAt'],
   'lists': ['boardId', 'name', 'position', 'createdAt', 'updatedAt', 'deletedAt'],
   'cards': [
-    'boardId', 'listId', 'position', 'title', 'description', 'start', 'due', 'priority',
-    'completed', 'completedAt', 'plannedFor', 'createdAt', 'updatedAt', 'deletedAt',
+    'boardId',
+    'listId',
+    'position',
+    'title',
+    'description',
+    'start',
+    'due',
+    'priority',
+    'completed',
+    'completedAt',
+    'plannedFor',
+    'createdAt',
+    'updatedAt',
+    'deletedAt',
   ],
   'settings': ['theme', 'density', 'updatedAt'],
   'notifications': ['cardId', 'dueKey', 'title', 'body', 'createdAt', 'readAt'],
@@ -42,7 +51,10 @@ bool _dateValue(Object? v) {
   if (v is! Map) return false;
   final date = v['date'];
   final time = v['time'];
-  return date is String && _day.hasMatch(date) && v.containsKey('time') && (time == null || (time is String && _time.hasMatch(time)));
+  return date is String &&
+      _day.hasMatch(date) &&
+      v.containsKey('time') &&
+      (time == null || (time is String && _time.hasMatch(time)));
 }
 
 /// The Zod schemas of shared/src/schema.ts, as plain checks. A field that may be null must
@@ -140,11 +152,7 @@ class FakeTack {
 
   void _write(String table, Json row, int s) {
     final id = row['id'] as String;
-    tables[table]![id] = {
-      'id': id,
-      for (final f in tableFields[table]!) f: row[f],
-      'clocks': clocksOf(row),
-    };
+    tables[table]![id] = {'id': id, for (final f in tableFields[table]!) f: row[f], 'clocks': clocksOf(row)};
     _rowSeq[table]![id] = s;
   }
 
@@ -170,11 +178,17 @@ class FakeTack {
       }
     }
     if (table == 'boards') {
-      final cards = [for (final c in tables['cards']!.values) if (c['boardId'] == id) c['id'] as String];
+      final cards = [
+        for (final c in tables['cards']!.values)
+          if (c['boardId'] == id) c['id'] as String,
+      ];
       for (final c in cards) {
         _remove('cards', c, s);
       }
-      final lists = [for (final l in tables['lists']!.values) if (l['boardId'] == id) l['id'] as String];
+      final lists = [
+        for (final l in tables['lists']!.values)
+          if (l['boardId'] == id) l['id'] as String,
+      ];
       for (final l in lists) {
         _remove('lists', l, s);
       }
@@ -308,6 +322,8 @@ class Client {
     String name = 'a',
     bool connected = true,
     int Function()? clock,
+    List<Override> extra = const [],
+    bool splash = false,
   }) async {
     sqfliteFfiInit();
     final db = await LocalDb.open('${dir.path}/$name.db', factory: databaseFactoryFfi);
@@ -325,6 +341,8 @@ class Client {
       networkRegainedProvider.overrideWithValue(const Stream.empty()),
       dueNotifierProvider.overrideWithValue(notifier),
       if (clock != null) wallClockProvider.overrideWithValue(clock),
+      splashProvider.overrideWithValue(splash),
+      ...extra,
     ];
     return Client._(ProviderContainer(overrides: overrides), db, notifier);
   }

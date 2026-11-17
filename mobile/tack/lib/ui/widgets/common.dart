@@ -128,7 +128,15 @@ class ConnectionPill extends ConsumerWidget {
 /// A screen's header: the logo (or a back arrow), the title, then the screen's own actions, with
 /// the connection pill on its own line when there is something to say (DESIGN.md "Layout").
 class TopBar extends StatelessWidget {
-  const TopBar({super.key, required this.title, this.actions = const [], this.onBack, this.small = false, this.onFix});
+  const TopBar({
+    super.key,
+    required this.title,
+    this.actions = const [],
+    this.onBack,
+    this.small = false,
+    this.onFix,
+    this.splashTarget = false,
+  });
   final String title;
   final List<Widget> actions;
 
@@ -138,6 +146,9 @@ class TopBar extends StatelessWidget {
   /// A board's name is smaller than a screen title (20px against 24px).
   final bool small;
   final VoidCallback? onFix;
+
+  /// The logo the splash lands on (the Boards screen's; one at a time).
+  final bool splashTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +175,7 @@ class TopBar extends StatelessWidget {
                 else
                   Padding(
                     padding: const EdgeInsets.only(left: Space.s4, right: Space.s2),
-                    child: LogoMark(key: logoKey),
+                    child: LogoMark(key: splashTarget ? logoKey : null),
                   ),
                 Expanded(
                   child: Semantics(

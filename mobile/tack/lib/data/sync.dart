@@ -61,7 +61,9 @@ class SyncEngine extends Notifier<SyncStatus> {
     if (!ref.mounted) return;
     state = SyncStatus(
       state: s,
-      lastSyncAt: s == SyncState.synced ? DateTime.now() : state.lastSyncAt,
+      lastSyncAt: s == SyncState.synced
+          ? DateTime.fromMillisecondsSinceEpoch(ref.read(wallClockProvider)(), isUtc: true)
+          : state.lastSyncAt,
       message: message,
     );
   }

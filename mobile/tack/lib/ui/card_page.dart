@@ -52,6 +52,7 @@ class CardSheet extends ConsumerWidget {
             // The grab bar: dragging here closes the sheet.
             SizedBox(
               height: 52,
+              width: double.infinity,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -529,7 +530,7 @@ class _DateButton extends StatelessWidget {
                       style: value == null
                           ? context.text.bodyMedium!.copyWith(color: t.textFaint)
                           : context.mono(
-                              14,
+                              13,
                               color: state == DueState.none || state == DueState.neutral ? t.text : s.fg,
                               weight: FontWeight.w500,
                             ),

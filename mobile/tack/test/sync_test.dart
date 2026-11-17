@@ -28,12 +28,15 @@ void main() {
   });
   tearDown(() => dir.deleteSync(recursive: true));
 
-  Future<Client> phone(String name, {int Function()? clock}) => Client.start(server, dir, name: name, clock: clock ?? tick);
+  Future<Client> phone(String name, {int Function()? clock}) =>
+      Client.start(server, dir, name: name, clock: clock ?? tick);
   Future<void> sync(Client c) => c.container.read(syncProvider.notifier).sync();
   SyncState stateOf(Client c) => c.container.read(syncProvider).state;
 
   /// Everything a phone holds, as text.
-  String dump(Library lib) => text({for (final table in tableNames) table: {for (final r in lib.rows(table)) r['id']: r}});
+  String dump(Library lib) => text({
+    for (final table in tableNames) table: {for (final r in lib.rows(table)) r['id']: r},
+  });
   String serverDump() => text({for (final table in tableNames) table: server.tables[table]});
 
   /// A board with one list, made on [c] and synced.
@@ -457,7 +460,10 @@ void main() {
     // The clock never goes back after a restart, so a new edit still beats the old one.
     final old = a.lib.cards[card]!.row['clocks'] as Map;
     a.store.updateCard(card, {'priority': 'low'});
-    expect(((a.lib.cards[card]!.row['clocks'] as Map)['priority'] as String).compareTo(old['priority'] as String), greaterThan(0));
+    expect(
+      ((a.lib.cards[card]!.row['clocks'] as Map)['priority'] as String).compareTo(old['priority'] as String),
+      greaterThan(0),
+    );
     await a.dispose();
   });
 
@@ -560,7 +566,9 @@ void main() {
             case 2:
               p.store.setCardCompleted(id, rnd.nextBool());
             case 3:
-              p.store.updateCard(id, {'due': rnd.nextBool() ? null : DateValue('2026-11-${10 + rnd.nextInt(18)}').toJson()});
+              p.store.updateCard(id, {
+                'due': rnd.nextBool() ? null : DateValue('2026-11-${10 + rnd.nextInt(18)}').toJson(),
+              });
             case 4:
               p.store.moveCardToList(id, lists[rnd.nextInt(2)]);
             case 5:

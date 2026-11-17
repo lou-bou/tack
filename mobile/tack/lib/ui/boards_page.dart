@@ -55,6 +55,7 @@ class _BoardsPageState extends ConsumerState<BoardsPage> {
         children: [
           TopBar(
             title: 'Boards',
+            splashTarget: true,
             onFix: () => openConnection(context),
             actions: [
               const BellButton(),

@@ -287,7 +287,11 @@ class _Trash extends ConsumerWidget {
           Text(_describe(r), style: context.text.bodySmall),
           Text(_daysLeft(r.daysLeft), style: context.mono(12, color: context.tack.ink3)),
           const SizedBox(height: Space.s2),
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: Space.s2,
+            runSpacing: Space.s1,
             children: [
               if (r.needsBoard)
                 Text('Restore the board first', style: context.text.bodySmall!.copyWith(fontStyle: FontStyle.italic))
@@ -301,7 +305,6 @@ class _Trash extends ConsumerWidget {
                     Toasts.show('${_kindLabel[r.kind]} restored');
                   },
                 ),
-              const Spacer(),
               KitButton(
                 label: 'Delete forever',
                 small: true,

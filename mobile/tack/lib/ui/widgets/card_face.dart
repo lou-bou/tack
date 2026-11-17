@@ -137,6 +137,7 @@ class _TackCheckboxState extends State<TackCheckbox> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final t = context.kit;
     return Semantics(
+      container: true,
       checked: widget.checked,
       label: widget.label,
       enabled: widget.enabled,
@@ -370,6 +371,7 @@ class CardFace extends ConsumerWidget {
     return Opacity(
       opacity: selecting && !selectable ? 0.5 : 1,
       child: Semantics(
+        container: true,
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,

@@ -468,6 +468,7 @@ class _BoardPageState extends ConsumerState<BoardPage> with Completion<BoardPage
     final byId = {for (final l in view.lists) l.list.id: l.list};
     return Container(
       height: controlHeight,
+      width: double.infinity,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: t.border)),
       ),
@@ -498,7 +499,6 @@ class _BoardPageState extends ConsumerState<BoardPage> with Completion<BoardPage
                   height: controlHeight,
                   constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.6),
                   padding: const EdgeInsets.symmetric(horizontal: Space.s3),
-                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: over ? t.accentSoft : (lifted ? context.tack.floating : null),
                     borderRadius: lifted ? BorderRadius.circular(TackRadii.control) : null,
@@ -506,13 +506,16 @@ class _BoardPageState extends ConsumerState<BoardPage> with Completion<BoardPage
                       bottom: BorderSide(color: isCurrent && !lifted ? t.accent : const Color(0x00000000), width: 2),
                     ),
                   ),
-                  child: Text(
-                    list.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.text.bodyMedium!.copyWith(
-                      color: isCurrent || over ? t.text : t.textMuted,
-                      fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
+                  child: Center(
+                    widthFactor: 1,
+                    child: Text(
+                      list.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.bodyMedium!.copyWith(
+                        color: isCurrent || over ? t.text : t.textMuted,
+                        fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
+                      ),
                     ),
                   ),
                 ),

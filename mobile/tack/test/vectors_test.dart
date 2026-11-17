@@ -126,7 +126,12 @@ void main() {
       for (final d in p['drop'] as List) {
         final siblings = [for (final i in d['siblings'] as List) _Item(i as Map)];
         expect(
-          dropPosition(siblings, (d['visibleOrder'] as List).cast<String>(), d['movedId'] as String, replay(d['randoms'] as List)),
+          dropPosition(
+            siblings,
+            (d['visibleOrder'] as List).cast<String>(),
+            d['movedId'] as String,
+            replay(d['randoms'] as List),
+          ),
           d['out'],
         );
       }
@@ -232,28 +237,28 @@ void main() {
         for (final c in cards) {
           expect(todayReason(c, now)?.name, (w['reasons'] as Map)[c.id], reason: c.id);
         }
-        expect(
-          [for (final g in selectToday(boards, lists, cards, now)) {'boardId': g.board.id, 'cardIds': [for (final c in g.cards) c.id]}],
-          w['today'],
-        );
+        expect([
+          for (final g in selectToday(boards, lists, cards, now))
+            {
+              'boardId': g.board.id,
+              'cardIds': [for (final c in g.cards) c.id],
+            },
+        ], w['today']);
         expect(todayBadgeCount(boards, lists, cards, now), w['badge']);
 
-        expect(
-          [
-            for (final t in selectTrash(boards, lists, cards, now))
-              {
-                'kind': t.kind.name,
-                'id': t.id,
-                'name': t.name,
-                'where': t.where,
-                'deletedAt': t.deletedAt,
-                'daysLeft': t.daysLeft,
-                'cardCount': t.cardCount,
-                'needsBoard': t.needsBoard,
-              },
-          ],
-          w['trash'],
-        );
+        expect([
+          for (final t in selectTrash(boards, lists, cards, now))
+            {
+              'kind': t.kind.name,
+              'id': t.id,
+              'name': t.name,
+              'where': t.where,
+              'deletedAt': t.deletedAt,
+              'daysLeft': t.daysLeft,
+              'cardCount': t.cardCount,
+              'needsBoard': t.needsBoard,
+            },
+        ], w['trash']);
         for (final d in w['daysLeft'] as List) {
           expect(trashDaysLeft(d[0] as String, now), d[1]);
         }
@@ -266,12 +271,15 @@ void main() {
         }
 
         final entries = selectCalendar(boards, lists, cards, {...(w['filter'] as List).cast<String>()});
-        expect(
-          [for (final e in entries) {'cardId': e.card.id, 'from': e.from, 'to': e.to, 'listName': e.listName}],
-          w['calendar'],
-        );
+        expect([
+          for (final e in entries) {'cardId': e.card.id, 'from': e.from, 'to': e.to, 'listName': e.listName},
+        ], w['calendar']);
         for (final day in (w['days'] as Map).entries) {
-          expect([for (final e in entriesOnDay(entries, day.key as String)) e.card.id], day.value, reason: '${day.key}');
+          expect(
+            [for (final e in entriesOnDay(entries, day.key as String)) e.card.id],
+            day.value,
+            reason: '${day.key}',
+          );
         }
       });
     }

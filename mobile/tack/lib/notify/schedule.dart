@@ -17,7 +17,14 @@ const notifyPref = 'notifications';
 const maxScheduled = 60;
 
 class Planned {
-  const Planned({required this.id, required this.key, required this.cardId, required this.atMs, required this.title, required this.body});
+  const Planned({
+    required this.id,
+    required this.key,
+    required this.cardId,
+    required this.atMs,
+    required this.title,
+    required this.body,
+  });
   final int id;
 
   /// `cardId:dueKey`: one notification per due date value.
@@ -112,7 +119,8 @@ class NotificationScheduler {
     final state = saved is Map ? saved : const {};
     // What is scheduled on the phone right now: id → {key, sig, at}.
     final scheduled = <String, Map<String, Object?>>{
-      for (final e in (state['scheduled'] as Map? ?? const {}).entries) '${e.key}': Map<String, Object?>.from(e.value as Map),
+      for (final e in (state['scheduled'] as Map? ?? const {}).entries)
+        '${e.key}': Map<String, Object?>.from(e.value as Map),
     };
     // Due values already notified: key → when, so old ones can be dropped.
     final done = <String, int>{

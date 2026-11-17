@@ -75,7 +75,12 @@ String? _increment(String x) {
   if (hi == _intDigits.length - 1) return null;
   final h = _intDigits[hi + 1];
   final delta = _intLength(h) - _intLength(head);
-  return h + (delta > 0 ? trailing + zero : delta < 0 ? trailing.substring(1) : trailing);
+  return h +
+      (delta > 0
+          ? trailing + zero
+          : delta < 0
+          ? trailing.substring(1)
+          : trailing);
 }
 
 String? _decrement(String x) {
@@ -94,7 +99,12 @@ String? _decrement(String x) {
   if (hi == 0) return null;
   final h = _intDigits[hi - 1];
   final delta = _intLength(h) - _intLength(head);
-  return h + (delta > 0 ? trailing + last : delta < 0 ? trailing.substring(1) : trailing);
+  return h +
+      (delta > 0
+          ? trailing + last
+          : delta < 0
+          ? trailing.substring(1)
+          : trailing);
 }
 
 /// A key strictly between [a] and [b] (either may be null for "no bound").
@@ -155,12 +165,12 @@ String positionBetween(String? before, String? after, [double Function()? random
 }
 
 /// Anything that has a place in an order.
-abstract interface class Positioned {
+abstract interface class Ordered {
   String get id;
   String get position;
 }
 
-int byPosition(Positioned a, Positioned b) {
+int byPosition(Ordered a, Ordered b) {
   if (a.position != b.position) return a.position.compareTo(b.position) < 0 ? -1 : 1;
   return a.id.compareTo(b.id).sign;
 }
@@ -168,7 +178,7 @@ int byPosition(Positioned a, Positioned b) {
 /// The position for an item placed at [index] in [sorted], which must not include the item
 /// itself. Two neighbours with equal positions (a rare offline collision) have nothing between
 /// them, so the item goes after all of the equal ones.
-String positionAt(List<Positioned> sorted, int index, [double Function()? random]) {
+String positionAt(List<Ordered> sorted, int index, [double Function()? random]) {
   final before = index - 1 >= 0 && index - 1 < sorted.length ? sorted[index - 1].position : null;
   var next = index;
   while (before != null && next < sorted.length && sorted[next].position.compareTo(before) <= 0) {
@@ -177,14 +187,13 @@ String positionAt(List<Positioned> sorted, int index, [double Function()? random
   return positionBetween(before, next >= 0 && next < sorted.length ? sorted[next].position : null, random);
 }
 
-String positionAtEnd(List<Positioned> sorted, [double Function()? random]) =>
-    positionAt(sorted, sorted.length, random);
+String positionAtEnd(List<Ordered> sorted, [double Function()? random]) => positionAt(sorted, sorted.length, random);
 
 /// The position for an item dropped into a list where only some items are on screen
 /// ([visibleOrder], after the drop, ids only). It lands next to its visible neighbour, and hidden
 /// items keep their own positions, so a completed card comes back where it was when unticked.
 /// [siblings] is every item in the list, sorted, without the moved one.
-String dropPosition(List<Positioned> siblings, List<String> visibleOrder, String movedId, [double Function()? random]) {
+String dropPosition(List<Ordered> siblings, List<String> visibleOrder, String movedId, [double Function()? random]) {
   final at = visibleOrder.indexOf(movedId);
   int indexOf(int i) => i >= 0 && i < visibleOrder.length ? siblings.indexWhere((s) => s.id == visibleOrder[i]) : -1;
   // JS reads visibleOrder[at + 1] with at = -1 as the first item, so keep that.

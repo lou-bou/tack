@@ -15,7 +15,13 @@ abstract class DueNotifier {
   /// Asks for permission. False when the user said no.
   Future<bool> request();
 
-  Future<void> schedule({required int id, required int atMs, required String title, required String body, required String cardId});
+  Future<void> schedule({
+    required int id,
+    required int atMs,
+    required String title,
+    required String body,
+    required String cardId,
+  });
 
   Future<void> show({required int id, required String title, required String body, String? cardId});
 
@@ -41,7 +47,13 @@ class FakeNotifier implements DueNotifier {
   Future<bool> request() async => permission;
 
   @override
-  Future<void> schedule({required int id, required int atMs, required String title, required String body, required String cardId}) async {
+  Future<void> schedule({
+    required int id,
+    required int atMs,
+    required String title,
+    required String body,
+    required String cardId,
+  }) async {
     scheduled[id] = (atMs: atMs, title: title, body: body, cardId: cardId);
   }
 

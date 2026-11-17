@@ -19,7 +19,10 @@ export 'model.dart';
 final localDbProvider = Provider<LocalDb>((_) => throw UnimplementedError('localDbProvider'));
 
 /// The time, as epoch ms. Tests and the screenshot tool pin it.
-final wallClockProvider = Provider<int Function()>((_) => () => DateTime.now().millisecondsSinceEpoch);
+final wallClockProvider = Provider<int Function()>(
+  (_) =>
+      () => DateTime.now().millisecondsSinceEpoch,
+);
 
 /// Everything the phone holds, as one immutable snapshot the UI reads.
 class Library {
@@ -239,13 +242,15 @@ class TackStore extends Notifier<Library> {
   Future<void> get flushed => _chain;
 
   Future<void> _persist(Future<void> Function(Transaction tx) fn) {
-    final next = _chain.catchError((_) {}).then(
-      (_) => _db.db.transaction((tx) async {
-        await fn(tx);
-        final c = _clock.snapshot;
-        await tx.putKv('hlc', jsonEncode({'ms': c.ms, 'counter': c.counter}));
-      }),
-    );
+    final next = _chain
+        .catchError((_) {})
+        .then(
+          (_) => _db.db.transaction((tx) async {
+            await fn(tx);
+            final c = _clock.snapshot;
+            await tx.putKv('hlc', jsonEncode({'ms': c.ms, 'counter': c.counter}));
+          }),
+        );
     _chain = next;
     return next;
   }
@@ -338,7 +343,8 @@ class TackStore extends Notifier<Library> {
   void trashList(String id) => update('lists', id, {'deletedAt': _iso()});
   void restoreList(String id) => update('lists', id, {'deletedAt': null});
 
-  List<TaskCard> _cardsIn(String listId) => state.cards.values.where((c) => c.listId == listId).toList()..sort(byPosition);
+  List<TaskCard> _cardsIn(String listId) =>
+      state.cards.values.where((c) => c.listId == listId).toList()..sort(byPosition);
 
   String createCard(String boardId, String listId, String title, {DateValue? due}) {
     final id = newId(_now());

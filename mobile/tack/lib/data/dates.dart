@@ -2,7 +2,7 @@
 /// [timeZone], whatever zone the phone is in (SPEC §1).
 library;
 
-import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/data/latest_10y.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 const timeZone = 'Africa/Algiers';
@@ -139,8 +139,18 @@ String formatTimestamp(String iso) {
 }
 
 const monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -212,9 +222,8 @@ bool startAfterDue(DateValue? start, DateValue? due) {
 }
 
 /// When the "due tomorrow" notification fires: 24 hours before, or 09:00 the day before.
-int notifyAt(DateValue due) => due.time != null
-    ? zonedMs(due.date, due.time!) - dayMs
-    : zonedMs(addDays(due.date, -1), dateOnlyNotifyTime);
+int notifyAt(DateValue due) =>
+    due.time != null ? zonedMs(due.date, due.time!) - dayMs : zonedMs(addDays(due.date, -1), dateOnlyNotifyTime);
 
 /// Notification text, based on the real day, since a notification can run late.
 String notificationBody(DateValue due, int now) {

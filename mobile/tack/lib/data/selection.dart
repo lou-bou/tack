@@ -18,7 +18,10 @@ enum TodayReason { overdue, dueToday, inProgress, planned }
 
 /// Put on Today by hand, on or before today. A plan carries over until done or taken off.
 bool isPlanned(TaskCard card, int now) =>
-    !card.completed && card.plannedFor != null && card.plannedFor!.isNotEmpty && card.plannedFor!.compareTo(todayString(now)) <= 0;
+    !card.completed &&
+    card.plannedFor != null &&
+    card.plannedFor!.isNotEmpty &&
+    card.plannedFor!.compareTo(todayString(now)) <= 0;
 
 /// Why a card belongs on Today, or null if it doesn't (SPEC §3.6). Dates win over a plan.
 TodayReason? todayReason(TaskCard card, int now) {
@@ -83,9 +86,7 @@ List<TodayGroup> selectToday(
     byBoard.putIfAbsent(lists[card.listId]!.boardId, () => []).add(card);
   }
   final shown = boards.values.where((b) => byBoard.containsKey(b.id)).toList()..sort(byPosition);
-  return [
-    for (final board in shown) TodayGroup(board, byBoard[board.id]!..sort((a, b) => compareToday(a, b, now))),
-  ];
+  return [for (final board in shown) TodayGroup(board, byBoard[board.id]!..sort((a, b) => compareToday(a, b, now)))];
 }
 
 /// The Today badge: overdue, due today and planned, leaving out cards that are only in progress.
@@ -139,57 +140,60 @@ class TrashRow {
 }
 
 /// Everything in Trash, newest first (SPEC §3.9).
-List<TrashRow> selectTrash(
-  Map<String, Board> boards,
-  Map<String, BoardList> lists,
-  Iterable<TaskCard> cards,
-  int now,
-) {
+List<TrashRow> selectTrash(Map<String, Board> boards, Map<String, BoardList> lists, Iterable<TaskCard> cards, int now) {
   final rows = <TrashRow>[];
   for (final board in boards.values) {
     if (board.deletedAt == null) continue;
-    rows.add(TrashRow(
-      kind: TrashKind.board,
-      id: board.id,
-      name: board.name,
-      where: '',
-      deletedAt: board.deletedAt!,
-      daysLeft: trashDaysLeft(board.deletedAt!, now),
-      cardCount: cards.where((c) => c.boardId == board.id && c.deletedAt == null).length,
-      needsBoard: false,
-    ));
+    rows.add(
+      TrashRow(
+        kind: TrashKind.board,
+        id: board.id,
+        name: board.name,
+        where: '',
+        deletedAt: board.deletedAt!,
+        daysLeft: trashDaysLeft(board.deletedAt!, now),
+        cardCount: cards.where((c) => c.boardId == board.id && c.deletedAt == null).length,
+        needsBoard: false,
+      ),
+    );
   }
   for (final list in lists.values) {
     final board = boards[list.boardId];
     // No board row means it was purged here, and this row's tombstone just hasn't arrived yet.
     if (list.deletedAt == null || board == null) continue;
-    rows.add(TrashRow(
-      kind: TrashKind.list,
-      id: list.id,
-      name: list.name,
-      where: board.name,
-      deletedAt: list.deletedAt!,
-      daysLeft: trashDaysLeft(list.deletedAt!, now),
-      cardCount: cards.where((c) => c.listId == list.id && c.deletedAt == null).length,
-      needsBoard: board.deletedAt != null,
-    ));
+    rows.add(
+      TrashRow(
+        kind: TrashKind.list,
+        id: list.id,
+        name: list.name,
+        where: board.name,
+        deletedAt: list.deletedAt!,
+        daysLeft: trashDaysLeft(list.deletedAt!, now),
+        cardCount: cards.where((c) => c.listId == list.id && c.deletedAt == null).length,
+        needsBoard: board.deletedAt != null,
+      ),
+    );
   }
   for (final card in cards) {
     final board = boards[card.boardId];
     if (card.deletedAt == null || board == null) continue;
     final list = lists[card.listId];
-    rows.add(TrashRow(
-      kind: TrashKind.card,
-      id: card.id,
-      name: card.title,
-      where: list != null ? '${board.name} / ${list.name}' : board.name,
-      deletedAt: card.deletedAt!,
-      daysLeft: trashDaysLeft(card.deletedAt!, now),
-      cardCount: 0,
-      needsBoard: board.deletedAt != null,
-    ));
+    rows.add(
+      TrashRow(
+        kind: TrashKind.card,
+        id: card.id,
+        name: card.title,
+        where: list != null ? '${board.name} / ${list.name}' : board.name,
+        deletedAt: card.deletedAt!,
+        daysLeft: trashDaysLeft(card.deletedAt!, now),
+        cardCount: 0,
+        needsBoard: board.deletedAt != null,
+      ),
+    );
   }
-  rows.sort((a, b) => a.deletedAt == b.deletedAt ? a.id.compareTo(b.id) : (a.deletedAt.compareTo(b.deletedAt) < 0 ? 1 : -1));
+  rows.sort(
+    (a, b) => a.deletedAt == b.deletedAt ? a.id.compareTo(b.id) : (a.deletedAt.compareTo(b.deletedAt) < 0 ? 1 : -1),
+  );
   return rows;
 }
 
@@ -204,7 +208,13 @@ List<TrashRow> selectTrash(
 // ---------- calendar ----------
 
 class CalendarEntry {
-  const CalendarEntry({required this.card, required this.board, required this.listName, required this.from, required this.to});
+  const CalendarEntry({
+    required this.card,
+    required this.board,
+    required this.listName,
+    required this.from,
+    required this.to,
+  });
   final TaskCard card;
   final Board board;
   final String listName;

@@ -98,7 +98,12 @@ class KitButton extends StatelessWidget {
       ButtonVariant.ghost => (Colors.transparent, t.textMuted, null),
       ButtonVariant.positive => (t.positiveSoft, t.positive, null),
       ButtonVariant.negative => (t.negativeSoft, t.negative, null),
-      ButtonVariant.danger => (t.negative, Colors.white, null),
+      // White on a light red (a dark theme's) is too faint to read.
+      ButtonVariant.danger => (
+        t.negative,
+        ThemeData.estimateBrightnessForColor(t.negative) == Brightness.dark ? Colors.white : Colors.black,
+        null,
+      ),
     };
     final style = context.text.labelLarge!.copyWith(color: fg, fontSize: small ? 13 : 15);
     final content = Row(

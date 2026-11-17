@@ -9,6 +9,7 @@ ThemeData buildKitTheme(
   KitTokens t,
   Brightness brightness, {
   List<ThemeExtension<dynamic>> extensions = const [],
+  String fontFamily = kitSans,
 }) {
   final scheme = ColorScheme(
     brightness: brightness,
@@ -29,7 +30,7 @@ ThemeData buildKitTheme(
 
   TextStyle s(double size, FontWeight w, {double? height, Color? color, double? spacing}) =>
       TextStyle(
-        fontFamily: kitSans,
+        fontFamily: fontFamily,
         fontSize: size,
         height: height ?? 1.4,
         color: color ?? t.text,
@@ -64,7 +65,7 @@ ThemeData buildKitTheme(
     colorScheme: scheme,
     scaffoldBackgroundColor: t.bg,
     canvasColor: t.bg,
-    fontFamily: kitSans,
+    fontFamily: fontFamily,
     textTheme: textTheme,
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,

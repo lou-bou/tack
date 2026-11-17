@@ -83,15 +83,12 @@ class SyncEngine extends Notifier<SyncStatus> {
       _set(SyncState.outdated);
     } on ApiException catch (e) {
       _again = false;
-      _set(
-        switch (e.kind) {
-          ApiFailure.accessDenied => SyncState.accessDenied,
-          ApiFailure.notConfigured => SyncState.notConfigured,
-          ApiFailure.network || ApiFailure.serverDown => SyncState.offline,
-          _ => SyncState.error,
-        },
-        message: e.message,
-      );
+      _set(switch (e.kind) {
+        ApiFailure.accessDenied => SyncState.accessDenied,
+        ApiFailure.notConfigured => SyncState.notConfigured,
+        ApiFailure.network || ApiFailure.serverDown => SyncState.offline,
+        _ => SyncState.error,
+      }, message: e.message);
     } catch (e) {
       _again = false;
       _set(SyncState.error, message: '$e');

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The status-bar icon: the pinned card in one colour (Android tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="512" android:viewportHeight="512">
+    <group android:rotation="-6" android:pivotX="256" android:pivotY="290">
+        <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+            android:pathData="M160,140 H352 A36,36 0,0 1,388 176 V404 A36,36 0,0 1,352 440 H160 A36,36 0,0 1,124 404 V176 A36,36 0,0 1,160 140 Z
+            M177,296 H335 A9,9 0,0 1,335 314 H177 A9,9 0,0 1,177 296 Z
+            M177,352 H279 A9,9 0,0 1,279 370 H177 A9,9 0,0 1,177 352 Z
+            M249,232 H335 A9,9 0,0 1,335 250 H249 A9,9 0,0 1,249 232 Z"/>
+    </group>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M206,96 a50,50 0,1 0,100 0 a50,50 0,1 0,-100 0 Z"/>
+</vector>

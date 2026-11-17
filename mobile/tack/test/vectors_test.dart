@@ -11,7 +11,7 @@ import 'package:tack/data/selection.dart';
 
 /// The Dart port against the real JS code: test/vectors.json is written by
 /// tool/gen_vectors.ts from shared/ (run it again after changing shared/).
-class _Item implements Positioned {
+class _Item implements Ordered {
   _Item(Map m) : id = m['id'] as String, position = m['position'] as String;
   @override
   final String id;

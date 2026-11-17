@@ -43,8 +43,9 @@ class LocalDb {
   Future<({Map<String, Map<String, Json>> rows, Map<String, Json> outbox, Map<String, String> kv})> loadAll() async {
     final rows = <String, Map<String, Json>>{};
     for (final r in await db.query('rows')) {
-      rows.putIfAbsent(r['tbl'] as String, () => {})[r['id'] as String] =
-          Map<String, Object?>.from(jsonDecode(r['data'] as String) as Map);
+      rows.putIfAbsent(r['tbl'] as String, () => {})[r['id'] as String] = Map<String, Object?>.from(
+        jsonDecode(r['data'] as String) as Map,
+      );
     }
     final outbox = <String, Json>{};
     for (final r in await db.query('outbox', orderBy: 'rowid')) {
@@ -57,13 +58,14 @@ class LocalDb {
 
 /// Writes inside one transaction.
 extension Writes on DatabaseExecutor {
-  Future<void> putRow(String table, Json row) => insert(
-    'rows',
-    {'tbl': table, 'id': row['id'], 'data': jsonEncode(row)},
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
+  Future<void> putRow(String table, Json row) => insert('rows', {
+    'tbl': table,
+    'id': row['id'],
+    'data': jsonEncode(row),
+  }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-  Future<void> deleteRow(String table, String id) => delete('rows', where: 'tbl = ? AND id = ?', whereArgs: [table, id]);
+  Future<void> deleteRow(String table, String id) =>
+      delete('rows', where: 'tbl = ? AND id = ?', whereArgs: [table, id]);
 
   /// Keeps the entry's place in the queue when it is edited again.
   Future<void> putOutbox(String key, Json entry) => rawInsert(
@@ -73,11 +75,8 @@ extension Writes on DatabaseExecutor {
 
   Future<void> deleteOutbox(String key) => delete('outbox', where: 'key = ?', whereArgs: [key]);
 
-  Future<void> putKv(String key, String value) => insert(
-    'kv',
-    {'key': key, 'value': value},
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
+  Future<void> putKv(String key, String value) =>
+      insert('kv', {'key': key, 'value': value}, conflictAlgorithm: ConflictAlgorithm.replace);
 
   Future<void> deleteKv(String key) => delete('kv', where: 'key = ?', whereArgs: [key]);
 }

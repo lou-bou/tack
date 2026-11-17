@@ -25,7 +25,7 @@ const tablesWithUpdatedAt = {'boards', 'lists', 'cards', 'settings'};
 
 /// Typed views over synced rows. The row itself stays a JSON map, exactly as it travels, so a
 /// field this version doesn't know is kept and sent back untouched.
-class Board implements Positioned {
+class Board implements Ordered {
   Board(this.row)
     : id = row['id'] as String,
       name = row['name'] as String? ?? '',
@@ -52,7 +52,7 @@ class Board implements Positioned {
   String get title => emoji != null ? '$emoji $name' : name;
 }
 
-class BoardList implements Positioned {
+class BoardList implements Ordered {
   BoardList(this.row)
     : id = row['id'] as String,
       boardId = row['boardId'] as String? ?? '',
@@ -70,7 +70,7 @@ class BoardList implements Positioned {
   final String? deletedAt;
 }
 
-class TaskCard implements Positioned {
+class TaskCard implements Ordered {
   TaskCard(this.row)
     : id = row['id'] as String,
       boardId = row['boardId'] as String? ?? '',
